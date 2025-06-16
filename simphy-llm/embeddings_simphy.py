@@ -53,9 +53,9 @@ class SimphyEmbedding:
         logging.info(f"Split the document into {len(chunks)} chunks.")
         if not chunks:
             logging.error("No chunks were created from the document. Please check the PDF file.")
-        logging.info("Value of chunk 1: %s", chunks[0].page_content[:300])  # Pprint first 300 characters of the first chunk for debugging
+        # logging.info("Value of chunk 1: %s", chunks[0].page_content[:300])  # Pprint first 300 characters of the first chunk for debugging
 
-        logging.info("Metadata of first chunk: %s", chunks[0].metadata)  # Print metadata of the first chunk for debugging
+        # logging.info("Metadata of first chunk: %s", chunks[0].metadata)  # Print metadata of the first chunk for debugging
 
 
         
@@ -72,48 +72,62 @@ class SimphyEmbedding:
             cleaned_chunks.append(Document(page_content=doc.page_content, metadata=safe_meta))
         # create an embedding model, also here test different embedding models
         # to see which one gives better results
-        logging.info("checking metadata for cleaned chunks and chunks")
-        if not cleaned_chunks:
-            logging.error("No cleaned chunks were created. Please check the document processing.")
+        # logging.info("checking metadata for cleaned chunks and chunks")
+        # if not cleaned_chunks:
+        #     logging.error("No cleaned chunks were created. Please check the document processing.")
 
-        logging.info("Number of cleaned chunks: %d", len(cleaned_chunks))
-        logging.info("Metadata of first cleaned chunk: %s", cleaned_chunks[0].metadata)  # Print metadata of the first cleaned chunk 
-        logging.info("Content of first normal chunk: %s", chunks[0].metadata)  # Print metadata of the first cleaned chunk
+        # logging.info("Number of cleaned chunks: %d", len(cleaned_chunks))
+        # logging.info("Metadata of first cleaned chunk: %s", cleaned_chunks[0].metadata)  # Print metadata of the first cleaned chunk 
+        # logging.info("Content of first normal chunk: %s", chunks[0].metadata)  # Print metadata of the first cleaned chunk
          
         # basic check for metadata
 
-        if cleaned_chunks[0].metadata== chunks[0].metadata:
-            logging.info("Metadata of cleaned chunks matches original chunks.")
-        else:
-            logging.warning("Metadata of cleaned chunks does not match original chunks. Please check the processing steps.")
+        # if cleaned_chunks[0].metadata== chunks[0].metadata:
+        #     logging.info("Metadata of cleaned chunks matches original chunks.")
+        # else:
+        #     logging.warning("Metadata of cleaned chunks does not match original chunks. Please check the processing steps.")
         
         # difference in metadata between cleaned chunks and original chunks
-        for i in range(min(3, len(chunks))):  # Check up to 3 chunks
-            print(f"\n--- Chunk {i} Metadata Comparison ---")
-            original_meta = chunks[i].metadata
-            cleaned_meta = cleaned_chunks[i].metadata
+        # for i in range(min(3, len(chunks))):  # Check up to 3 chunks
+        #     print(f"\n--- Chunk {i} Metadata Comparison ---")
+        #     original_meta = chunks[i].metadata
+        #     cleaned_meta = cleaned_chunks[i].metadata
             
-            print("Original metadata types:")
-            for k, v in original_meta.items():
-                print(f"  {k}: {type(v).__name__} = {v!r}")
+        #     print("Original metadata types:")
+        #     for k, v in original_meta.items():
+        #         print(f"  {k}: {type(v).__name__} = {v!r}")
             
-            print("Cleaned metadata types:")
-            for k, v in cleaned_meta.items():
-                print(f"  {k}: {type(v).__name__} = {v!r}")
+        #     print("Cleaned metadata types:")
+        #     for k, v in cleaned_meta.items():
+        #         print(f"  {k}: {type(v).__name__} = {v!r}")
             
-            # Find differences
-            print("Differences:")
-            for k in set(original_meta.keys()) | set(cleaned_meta.keys()):
-                if k not in original_meta:
-                    print(f"  {k}: Only in cleaned metadata")
-                elif k not in cleaned_meta:
-                    print(f"  {k}: Only in original metadata")
-                elif original_meta[k] != cleaned_meta[k]:
-                    print(f"  {k}: Original={original_meta[k]!r}, Cleaned={cleaned_meta[k]!r}")
+        #     # Find differences
+        #     print("Differences:")
+        #     for k in set(original_meta.keys()) | set(cleaned_meta.keys()):
+        #         if k not in original_meta:
+        #             print(f"  {k}: Only in cleaned metadata")
+        #         elif k not in cleaned_meta:
+        #             print(f"  {k}: Only in original metadata")
+        #         elif original_meta[k] != cleaned_meta[k]:
+        #             print(f"  {k}: Original={original_meta[k]!r}, Cleaned={cleaned_meta[k]!r}")
+
+        ## Make sure chunks don't contain file objects
+        # for i, chunk in enumerate(chunks[:5]):  # Check first 5 chunks
+        #     logging.info(f"Chunk {i} metadata: {chunk.metadata if hasattr(chunk, 'metadata') else 'No metadata'}")
+        #     print(" ")
+        # print(chunks[0].model_dump())
+        # exit()
+
+        logging.info("Metadata of first chunk before cleaning: %s", chunks[0].metadata)  
+        # Clean metadata to ensure all values are strings and remove problematic fields
+        
+        chunks = self.cleanmetadata(chunks)
+
+        logging.info("Metadata of first chunk after cleaning: %s", chunks[0].metadata)  
 
 
-        exit()
-
+        
+        
         embedding_model = HuggingFaceEmbeddings(
             model_name="sentence-transformers/all-MiniLM-L6-v2",
 
@@ -131,7 +145,41 @@ class SimphyEmbedding:
         )
 
         return vectorstore
+    def cleanmetadata(self, chunks):
+        """
+        Clean metadata from PDF chunks to make them serializable for Qdrant
+        """
+        logging.info(f"Cleaning metadata for {len(chunks)} chunks...")
+        
+        for i, chunk in enumerate(chunks):
+            # Id issue, its empy 
+            if hasattr(chunk, 'id') and chunk.id is None:
+                chunk.id = f"chunk_{i}"  # might use uuid: f"chunk_{uuid.uuid4()}" in future
 
+
+            if hasattr(chunk, 'metadata') and chunk.metadata:
+                # Create clean metadata with only necessary, serializable fields
+                clean_metadata = {
+                    'title': str(chunk.metadata.get('title', 'Simphy Scripting Guide')),
+                    'source': str(chunk.metadata.get('source', '')),
+                    'page': int(chunk.metadata.get('page', 0)),
+                    'total_pages': int(chunk.metadata.get('total_pages', 271))
+                }
+                
+                # Only add page_label if it exists and is not empty
+                page_label = chunk.metadata.get('page_label')
+                if page_label and page_label.strip():
+                    clean_metadata['page_label'] = str(page_label)
+                
+                # Replace the original metadata
+                chunk.metadata = clean_metadata
+                
+            # Also ensure the chunk has the correct type
+            if hasattr(chunk, 'type'):
+                chunk.type = 'Document'
+        
+        logging.info("Metadata cleaning completed.")
+        return chunks
 
 
 if __name__ == "__main__":
