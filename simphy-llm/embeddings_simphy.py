@@ -1,11 +1,37 @@
 # simphy-llm/embeddings_simphy.py
-from langchain.document_loaders import PyPDFLoader
+# from langchain.document_loaders import PyPDFLoader ## deprecated 
+from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.vectorstores import Qdrant
+# from langchain.embeddings import HuggingFaceEmbeddings # Deprecated, use langchain_community.embeddings instead
+# from langchain_community.embeddings import HuggingFaceEmbedding
+
+# from :class:`~langchain_huggingface.HuggingFaceEmbeddings` import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
+
+# from langchain.vectorstores import Qdrant #Deprecated, use langchain_community.vectorstores instead
+from langchain_community.vectorstores import Qdrant
 from qdrant_client import QdrantClient
 import os
+import logging
+from langchain_core.documents import Document
 
+
+## thigns to do
+# 1. Store the embeddings model locally, so that it can be reused without reloading
+# 4  Store the embeddings in a vector store, such as Qdrant or FAISS for now qdrant
+# 5. Add a method to save the vector store to disk for later use
+# 6. Add a method to load the vector store from disk
+# 2. Add a method to search the vector store with a query and return relevant documents that might be a method for the retrivar class
+# 7. Add a method to update the vector store with new documents
+# 3. Add error handling for file loading and embedding processes
+# 8. Add a method to delete documents from the vector store
+# 9. Need to see the docket and internet version of the qdrant client, for now using in-memory for testing
+# 10. Add a method to clear the vector store
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+
+# SimphyEmbedding class to load a PDF document, split it into chunks, and create embeddings
 class SimphyEmbedding:
     def __init__(self, pdf_path):
         self.pdf_path = pdf_path
@@ -15,7 +41,7 @@ class SimphyEmbedding:
         # Load the PDF document
         loader = PyPDFLoader(self.pdf_path)
         docs = loader.load_and_split()
-
+        logging.info(f"Loaded {len(docs)} pages from the PDF document.")
         
         # and split it into chunks
         # need to split it into smaller chunks for processing, and playing with chunk size for better results
@@ -24,19 +50,81 @@ class SimphyEmbedding:
             chunk_overlap=100    # overlap to preserve context between chunks
         )
         chunks = splitter.split_documents(docs)
+        logging.info(f"Split the document into {len(chunks)} chunks.")
+        if not chunks:
+            logging.error("No chunks were created from the document. Please check the PDF file.")
+        logging.info("Value of chunk 1: %s", chunks[0].page_content[:300])  # Pprint first 300 characters of the first chunk for debugging
 
+        logging.info("Metadata of first chunk: %s", chunks[0].metadata)  # Print metadata of the first chunk for debugging
+
+
+        
+        
+        cleaned_chunks = []
+        for doc in chunks:
+            safe_meta = {}
+            for k, v in doc.metadata.items():
+                try:
+                    safe_meta[str(k)] = str(v)  # force string-only metadata
+                except Exception:
+                    continue  # skip any unserializable field
+
+            cleaned_chunks.append(Document(page_content=doc.page_content, metadata=safe_meta))
         # create an embedding model, also here test different embedding models
         # to see which one gives better results
+        logging.info("checking metadata for cleaned chunks and chunks")
+        if not cleaned_chunks:
+            logging.error("No cleaned chunks were created. Please check the document processing.")
+
+        logging.info("Number of cleaned chunks: %d", len(cleaned_chunks))
+        logging.info("Metadata of first cleaned chunk: %s", cleaned_chunks[0].metadata)  # Print metadata of the first cleaned chunk 
+        logging.info("Content of first normal chunk: %s", chunks[0].metadata)  # Print metadata of the first cleaned chunk
+         
+        # basic check for metadata
+
+        if cleaned_chunks[0].metadata== chunks[0].metadata:
+            logging.info("Metadata of cleaned chunks matches original chunks.")
+        else:
+            logging.warning("Metadata of cleaned chunks does not match original chunks. Please check the processing steps.")
+        
+        # difference in metadata between cleaned chunks and original chunks
+        for i in range(min(3, len(chunks))):  # Check up to 3 chunks
+            print(f"\n--- Chunk {i} Metadata Comparison ---")
+            original_meta = chunks[i].metadata
+            cleaned_meta = cleaned_chunks[i].metadata
+            
+            print("Original metadata types:")
+            for k, v in original_meta.items():
+                print(f"  {k}: {type(v).__name__} = {v!r}")
+            
+            print("Cleaned metadata types:")
+            for k, v in cleaned_meta.items():
+                print(f"  {k}: {type(v).__name__} = {v!r}")
+            
+            # Find differences
+            print("Differences:")
+            for k in set(original_meta.keys()) | set(cleaned_meta.keys()):
+                if k not in original_meta:
+                    print(f"  {k}: Only in cleaned metadata")
+                elif k not in cleaned_meta:
+                    print(f"  {k}: Only in original metadata")
+                elif original_meta[k] != cleaned_meta[k]:
+                    print(f"  {k}: Original={original_meta[k]!r}, Cleaned={cleaned_meta[k]!r}")
+
+
+        exit()
+
         embedding_model = HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2"
+            model_name="sentence-transformers/all-MiniLM-L6-v2",
+
         )
 
         # Store the embeddings in a vector store
         
-        client = QdrantClient(":memory:")  # Use in-memory; for production use persistent storage ?? what does this line do?
+        client = QdrantClient(path="qdrant_data/")  # Use in-memory; for production use persistent storage ?? what does this line do?
 
         vectorstore = Qdrant.from_documents(
-            documents=chunks,
+            documents=cleaned_chunks,
             embedding=embedding_model,
             collection_name="simphy_guide",
             client=client
@@ -49,7 +137,7 @@ class SimphyEmbedding:
 if __name__ == "__main__":
     script_dir = os.path.dirname(os.path.abspath(__file__))
     pdf_path = os.path.join(script_dir, "docs", "SimpScriptG.pdf")
-    print(pdf_path)  # Path to your PDF file
+    # print(pdf_path)  # Path to your PDF file
     simphy_embedding = SimphyEmbedding(pdf_path)
     vectorstore = simphy_embedding.load_and_embed()
 
@@ -58,7 +146,7 @@ if __name__ == "__main__":
     retriever = vectorstore.as_retriever(search_kwargs={"k": 3}) # Retrieve top 3 relevant documents
     # You can change the query to test different questions
     
-    query = "How do I print to console in SimPhy?"
+    query = "How do add a square in SimPhy?"
     docs = retriever.get_relevant_documents(query)
 
     for d in docs:
