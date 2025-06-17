@@ -238,7 +238,8 @@ class SimphyEmbedding:
                 documents=chunks,
                 embedding=embedding_model,
                 collection_name="simphy_guide",
-                client=client
+                # client=client
+                location=":memory:", # Check if this works with self.qdrantdb_path
             )
             logging.info("Vector store created successfully.")
             self.vectorstore = vectorstore # Initialize the vectorstore attribute
@@ -257,7 +258,7 @@ class SimphyEmbedding:
                 logging.error("Vector store is not initialized.")
                 return []
             
-            retriever = self.vectorstore.as_retriever(search_kwargs={"k": 3})  # Retrieve top 3 relevant documents
+            retriever = self.vectorstore.as_retriever(search_kwargs={"k": k})  # Retrieve top 3 relevant documents
             docs = retriever.get_relevant_documents(query)
             logging.info(f"Retrieved {len(docs)} documents for query: {query}")
             return docs
@@ -306,7 +307,8 @@ if __name__ == "__main__":
         else:
             logging.info(f"\nFound {len(docs)} relevant document(s):")
             for i, doc in enumerate(docs, 1):
-                logging.info(f"\n--- Result {i} ---")
+                
+                logging.info(f"\n\n--- Result {i} ---")
                 logging.info(f"Page: {doc.metadata.get('page', 'Unknown')}")
-                logging.info(f"Content: {doc.page_content[:200]}...")  # Show first 200 chars
+                logging.info(f"Content: \n{doc.page_content[:200]}...")  # Show first 200 chars
     
