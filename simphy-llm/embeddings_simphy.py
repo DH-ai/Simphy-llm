@@ -32,6 +32,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 # 11. Add a method to modify the metadata of individual chunksi
 # 12. Add command-line argument parsing for PDF path
 # 13. Add seperate logic for case when vectorstore is created 
+
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -225,7 +226,7 @@ class SimphyEmbedding:
         """
         try:
             embedding_model = HuggingFaceEmbeddings(
-                model_name="sentence-transformers/all-MiniLM-L6-v2",
+                model_name="sentence-transformers/all-MiniLM-L6-v2", # try BAAI/bge-small-en,intfloat/multilingual-e5-small
                 model_kwargs={"device": "cuda" if torch.cuda.is_available() else "cpu"}, # Need to see about torch # Need to see about torch
                 encode_kwargs={"normalize_embeddings": True}  # Normalize embeddings for better similarity search, maybe look for cosine similarity if avail
             )
@@ -290,25 +291,27 @@ if __name__ == "__main__":
     logging.info("Testing retrieval...")
     # Interactive query loop
     logging.info("Enter your queries below. Type 'quit', 'exit', or 'q' to end the session.")
-    while True:
-        query = input("\nEnter your query: ")
-        if query.lower() in ['quit', 'exit', 'q']:
-            logging.warning("Exiting query session.")
-            break
+    
+     
+    # while True:
+    #     query = input("\nEnter your query: ")
+    #     if query.lower() in ['quit', 'exit', 'q']:
+    #         logging.warning("Exiting query session.")
+    #         break
         
-        if not query.strip():
-            logging.warning("Please enter a valid query.")
-            continue
+    #     if not query.strip():
+    #         logging.warning("Please enter a valid query.")
+    #         continue
         
-        docs = simphy_embedding.retriever(query)
+    #     docs = simphy_embedding.retriever(query)
         
-        if not docs:
-            logging.warning("No relevant documents found for your query.")
-        else:
-            logging.info(f"\nFound {len(docs)} relevant document(s):")
-            for i, doc in enumerate(docs, 1):
+    #     if not docs:
+    #         logging.warning("No relevant documents found for your query.")
+    #     else:
+    #         logging.info(f"\nFound {len(docs)} relevant document(s):")
+    #         for i, doc in enumerate(docs, 1):
                 
-                logging.info(f"\n\n--- Result {i} ---")
-                logging.info(f"Page: {doc.metadata.get('page', 'Unknown')}")
-                logging.info(f"Content: \n{doc.page_content[:200]}...")  # Show first 200 chars
+    #             logging.info(f"\n\n--- Result {i} ---")
+    #             logging.info(f"Page: {doc.metadata.get('page', 'Unknown')}")
+    #             logging.info(f"Content: \n{doc.page_content[:200]}...")  # Show first 200 chars
     
