@@ -210,7 +210,7 @@ class SimphyEmbedding:
         """
         try:
             splitter = RecursiveCharacterTextSplitter(
-                chunk_size=800,      # each chunk has 800 characters
+                chunk_size=200,      # each chunk has 800 characters
                 chunk_overlap=100    # overlap to preserve context between chunks
             )
             chunks = splitter.split_documents(docs)
@@ -269,7 +269,7 @@ class SimphyEmbedding:
 
 
         
-
+#Seeing the vector 
 
 if __name__ == "__main__":
 
@@ -313,5 +313,5 @@ if __name__ == "__main__":
                 
                 logging.info(f"\n\n--- Result {i} ---")
                 logging.info(f"Page: {doc.metadata.get('page', 'Unknown')}")
-                logging.info(f"Content: \n{doc.page_content[:200]}...")  # Show first 200 chars
+                logging.info(f"Content: \n{doc.page_content}...")  # Show first 200 chars
     
