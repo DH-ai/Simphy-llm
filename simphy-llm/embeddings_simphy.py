@@ -14,7 +14,9 @@ from qdrant_client import QdrantClient
 import os
 import logging
 from langchain_core.documents import Document
-
+import torch
+import argparse
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 ## thigns to do
 # 1. Store the embeddings model locally, so that it can be reused without reloading
@@ -27,6 +29,9 @@ from langchain_core.documents import Document
 # 8. Add a method to delete documents from the vector store
 # 9. Need to see the docket and internet version of the qdrant client, for now using in-memory for testing
 # 10. Add a method to clear the vector store
+# 11. Add a method to modify the metadata of individual chunksi
+# 12. Add command-line argument parsing for PDF path
+# 13. Add seperate logic for case when vectorstore is created 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -35,9 +40,12 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 class SimphyEmbedding:
     def __init__(self, pdf_path):
         self.pdf_path = pdf_path
+        self.vectorstore= None
+        self.qdrantdb_path = os.path.join(SCRIPT_DIR,"qdrant_data/")  # Path to store Qdrant data, can be changed to a different path if needed
 
     
     def load_and_embed(self):
+
         # Load the PDF document
         loader = PyPDFLoader(self.pdf_path)
         docs = loader.load_and_split()
@@ -145,6 +153,7 @@ class SimphyEmbedding:
         )
 
         return vectorstore
+    
     def cleanmetadata(self, chunks):
         """
         Clean metadata from PDF chunks to make them serializable for Qdrant
@@ -180,23 +189,124 @@ class SimphyEmbedding:
         
         logging.info("Metadata cleaning completed.")
         return chunks
+    
+    def load_pdf(self)->list[Document]:
+        """
+        Load the PDF document and return the raw text content.
+        """
+        try:
+            loader = PyPDFLoader(self.pdf_path)
+            docs = loader.load()
+            logging.info(f"Loaded {len(docs)} pages from the PDF document.")
+            return docs
+        except Exception as e:
+            logging.error(f"Failed to load PDF document: {e}")
+            return []
+    
+    def splitter(self, docs):
+        """
+        Split the loaded documents into smaller chunks.
+        """
+        try:
+            splitter = RecursiveCharacterTextSplitter(
+                chunk_size=800,      # each chunk has 800 characters
+                chunk_overlap=100    # overlap to preserve context between chunks
+            )
+            chunks = splitter.split_documents(docs)
+            logging.info(f"Split the document into {len(chunks)} chunks.")
+            return chunks
+        except Exception as e:
+            logging.error(f"Failed to split documents: {e}")
+            return []
+    
+    def vector_store(self, chunks):
+        """
+        Create a vector store from the chunks using HuggingFace embeddings.
+        """
+        try:
+            embedding_model = HuggingFaceEmbeddings(
+                model_name="sentence-transformers/all-MiniLM-L6-v2",
+                model_kwargs={"device": "cuda" if torch.cuda.is_available() else "cpu"}, # Need to see about torch # Need to see about torch
+                encode_kwargs={"normalize_embeddings": True}  # Normalize embeddings for better similarity search, maybe look for cosine similarity if avail
+            )
+
+            client = QdrantClient(":memory:")  # Use in-memory
+            # client = QdrantClient(path=self.qdrantdb_path)  # testing disk storage this time
+            
+
+            vectorstore = Qdrant.from_documents(
+                documents=chunks,
+                embedding=embedding_model,
+                collection_name="simphy_guide",
+                client=client
+            )
+            logging.info("Vector store created successfully.")
+            self.vectorstore = vectorstore # Initialize the vectorstore attribute
+            # Save the vectorstore to disk for later use
+            return vectorstore
+        except Exception as e:
+            logging.error(f"Failed to create vector store: {e}")
+            return None
+        
+    def retriever(self, query, k=3):
+        """
+        Retrieve relevant documents from the vector store based on a query.
+        """
+        try:
+            if self.vectorstore is None:
+                logging.error("Vector store is not initialized.")
+                return []
+            
+            retriever = self.vectorstore.as_retriever(search_kwargs={"k": 3})  # Retrieve top 3 relevant documents
+            docs = retriever.get_relevant_documents(query)
+            logging.info(f"Retrieved {len(docs)} documents for query: {query}")
+            return docs
+        except Exception as e:
+            logging.error(f"Failed to retrieve documents: {e}")
+            return []
+
+
+        
 
 
 if __name__ == "__main__":
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    pdf_path = os.path.join(script_dir, "docs", "SimpScriptG.pdf")
+
+    pdf_path = os.path.join(SCRIPT_DIR, "docs", "SimpScriptG.pdf")
     # print(pdf_path)  # Path to your PDF file
     simphy_embedding = SimphyEmbedding(pdf_path)
-    vectorstore = simphy_embedding.load_and_embed()
+    # vectorstore = simphy_embedding.load_and_embed()
 
-    # Example query to test the retriever
     
-    retriever = vectorstore.as_retriever(search_kwargs={"k": 3}) # Retrieve top 3 relevant documents
-    # You can change the query to test different questions
-    
-    query = "How do add a square in SimPhy?"
-    docs = retriever.get_relevant_documents(query)
 
-    for d in docs:
-        print("---")
-        print(d.page_content[:300])
+    pdf_doc = simphy_embedding.load_pdf()
+    chunks = simphy_embedding.splitter(pdf_doc)
+    vectorstore = simphy_embedding.vector_store(chunks)
+
+    if vectorstore is None:
+        logging.error("Failed to create vector store. Exiting.")
+        exit(1)
+
+    logging.info("Testing retrieval...")
+    # Interactive query loop
+    logging.info("Enter your queries below. Type 'quit', 'exit', or 'q' to end the session.")
+    while True:
+        query = input("\nEnter your query: ")
+        if query.lower() in ['quit', 'exit', 'q']:
+            logging.warning("Exiting query session.")
+            break
+        
+        if not query.strip():
+            logging.warning("Please enter a valid query.")
+            continue
+        
+        docs = simphy_embedding.retriever(query)
+        
+        if not docs:
+            logging.warning("No relevant documents found for your query.")
+        else:
+            logging.info(f"\nFound {len(docs)} relevant document(s):")
+            for i, doc in enumerate(docs, 1):
+                logging.info(f"\n--- Result {i} ---")
+                logging.info(f"Page: {doc.metadata.get('page', 'Unknown')}")
+                logging.info(f"Content: {doc.page_content[:200]}...")  # Show first 200 chars
+    

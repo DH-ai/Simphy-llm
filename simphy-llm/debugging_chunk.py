@@ -102,6 +102,7 @@ def find_problematic_chunks(chunks):
     return problematic_chunks
 
 def test_embeddings_serial(model):
+    embedding_model = model # corrected 
     logging.info("2. Testing embedding model serialization...")
     try:
         copy.deepcopy(embedding_model)
