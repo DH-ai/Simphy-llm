@@ -293,25 +293,25 @@ if __name__ == "__main__":
     logging.info("Enter your queries below. Type 'quit', 'exit', or 'q' to end the session.")
     
      
-    # while True:
-    #     query = input("\nEnter your query: ")
-    #     if query.lower() in ['quit', 'exit', 'q']:
-    #         logging.warning("Exiting query session.")
-    #         break
+    while True:
+        query = input("\nEnter your query: ")
+        if query.lower() in ['quit', 'exit', 'q']:
+            logging.warning("Exiting query session.")
+            break
         
-    #     if not query.strip():
-    #         logging.warning("Please enter a valid query.")
-    #         continue
+        if not query.strip():
+            logging.warning("Please enter a valid query.")
+            continue
         
-    #     docs = simphy_embedding.retriever(query)
+        docs = simphy_embedding.retriever(query)
         
-    #     if not docs:
-    #         logging.warning("No relevant documents found for your query.")
-    #     else:
-    #         logging.info(f"\nFound {len(docs)} relevant document(s):")
-    #         for i, doc in enumerate(docs, 1):
+        if not docs:
+            logging.warning("No relevant documents found for your query.")
+        else:
+            logging.info(f"\nFound {len(docs)} relevant document(s):")
+            for i, doc in enumerate(docs, 1):
                 
-    #             logging.info(f"\n\n--- Result {i} ---")
-    #             logging.info(f"Page: {doc.metadata.get('page', 'Unknown')}")
-    #             logging.info(f"Content: \n{doc.page_content[:200]}...")  # Show first 200 chars
+                logging.info(f"\n\n--- Result {i} ---")
+                logging.info(f"Page: {doc.metadata.get('page', 'Unknown')}")
+                logging.info(f"Content: \n{doc.page_content[:200]}...")  # Show first 200 chars
     
