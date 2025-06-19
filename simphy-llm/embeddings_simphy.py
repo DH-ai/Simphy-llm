@@ -210,8 +210,8 @@ class SimphyEmbedding:
         """
         try:
             splitter = RecursiveCharacterTextSplitter(
-                chunk_size=200,      # each chunk has 800 characters
-                chunk_overlap=100    # overlap to preserve context between chunks
+                chunk_size=800,      # each chunk has 800 characters
+                chunk_overlap=300    # overlap to preserve context between chunks
             )
             chunks = splitter.split_documents(docs)
             logging.info(f"Split the document into {len(chunks)} chunks.")
@@ -273,7 +273,7 @@ class SimphyEmbedding:
 
 if __name__ == "__main__":
 
-    pdf_path = os.path.join(SCRIPT_DIR, "docs", "SimpScriptG.pdf")
+    pdf_path = os.path.join(SCRIPT_DIR, "docs", "SimpScriptGPart3.pdf")
     # print(pdf_path)  # Path to your PDF file
     simphy_embedding = SimphyEmbedding(pdf_path)
     # vectorstore = simphy_embedding.load_and_embed()
@@ -294,10 +294,15 @@ if __name__ == "__main__":
     
      
     while True:
-        query = input("\nEnter your query: ")
+        query = input("\nEnter your query (type 'clear' to clear screen, 'exit' to quit): ")
+        
         if query.lower() in ['quit', 'exit', 'q']:
             logging.warning("Exiting query session.")
             break
+        
+        if query.lower() in ['clear', 'cls']:
+            os.system('cls' if os.name == 'nt' else 'clear')
+            continue
         
         if not query.strip():
             logging.warning("Please enter a valid query.")
@@ -314,4 +319,3 @@ if __name__ == "__main__":
                 logging.info(f"\n\n--- Result {i} ---")
                 logging.info(f"Page: {doc.metadata.get('page', 'Unknown')}")
                 logging.info(f"Content: \n{doc.page_content}...")  # Show first 200 chars
-    
