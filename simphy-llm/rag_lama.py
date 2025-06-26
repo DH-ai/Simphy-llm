@@ -24,7 +24,7 @@ class SimplePDFRetriever:
         vectorstore = FAISS.from_documents(splits, self.embeddings)
         return vectorstore.as_retriever()
 
-    def search(self, query: str, top_k: int = 4):
+    def search(self, query: str, top_k: int = 6):
         return self.retriever.get_relevant_documents(query)[:top_k]
 
 if __name__ == "__main__":
@@ -32,7 +32,7 @@ if __name__ == "__main__":
     pdf_path = os.path.join(SCRIPT_DIR, "docs", "SimpScriptGPart3.pdf")
     
     retriever = SimplePDFRetriever(pdf_path)
-    query = "how to create a rectangle and attach spring?"
+    query = "Create a triangular wedge with sides 6, 8 and 10 and mass 5"
     matches = retriever.search(query)
 
     for i, doc in enumerate(matches):

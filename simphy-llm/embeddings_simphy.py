@@ -16,7 +16,7 @@ import logging
 from langchain_core.documents import Document
 import torch
 import argparse
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+from langchain_community.vectorstores import FAISS
 
 ## thigns to do
 # 1. Store the embeddings model locally, so that it can be reused without reloading
@@ -33,6 +33,9 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 # 12. Add command-line argument parsing for PDF path
 # 13. Add seperate logic for case when vectorstore is created 
 
+
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -44,8 +47,18 @@ class SimphyEmbedding:
         self.vectorstore= None
         self.qdrantdb_path = os.path.join(SCRIPT_DIR,"qdrant_data/")  # Path to store Qdrant data, can be changed to a different path if needed
 
+    def setuprag(self):
+        pdf_docs = self.load_pdf()
+        chunks = self.splitter(pdf_docs)
+        vectorstore = self.vector_store(chunks)
+        if vectorstore is None:
+            logging.error("Failed to create vector store. Exiting.")
+            exit(1)
+        logging.info("RAG setup completed successfully.")
+        
+        
     
-    def load_and_embed(self):
+    def _load_and_embed(self):
 
         # Load the PDF document
         loader = PyPDFLoader(self.pdf_path)
@@ -55,7 +68,7 @@ class SimphyEmbedding:
         # and split it into chunks
         # need to split it into smaller chunks for processing, and playing with chunk size for better results
         splitter = RecursiveCharacterTextSplitter(
-            chunk_size=800,      # each chunk has 800 characters
+            chunk_size=1000,      # each chunk has 800 characters
             chunk_overlap=100    # overlap to preserve context between chunks
         )
         chunks = splitter.split_documents(docs)
@@ -198,7 +211,7 @@ class SimphyEmbedding:
         try:
             loader = PyPDFLoader(self.pdf_path)
             docs = loader.load()
-            logging.info(f"Loaded {len(docs)} pages from the PDF document.")
+            # logging.info(f"Loaded {len(docs)} pages from the PDF document.")
             return docs
         except Exception as e:
             logging.error(f"Failed to load PDF document: {e}")
@@ -210,11 +223,11 @@ class SimphyEmbedding:
         """
         try:
             splitter = RecursiveCharacterTextSplitter(
-                chunk_size=800,      # each chunk has 800 characters
-                chunk_overlap=300    # overlap to preserve context between chunks
+                chunk_size=1000,      # each chunk has 800 characters
+                chunk_overlap=100    # overlap to preserve context between chunks
             )
             chunks = splitter.split_documents(docs)
-            logging.info(f"Split the document into {len(chunks)} chunks.")
+            # logging.info(f"Split the document into {len(chunks)} chunks.")
             return chunks
         except Exception as e:
             logging.error(f"Failed to split documents: {e}")
@@ -231,17 +244,25 @@ class SimphyEmbedding:
                 encode_kwargs={"normalize_embeddings": True}  # Normalize embeddings for better similarity search, maybe look for cosine similarity if avail
             )
 
-            client = QdrantClient(":memory:")  # Use in-memory
+            # client = QdrantClient(":memory:")  # Use in-memory
             # client = QdrantClient(path=self.qdrantdb_path)  # testing disk storage this time
             
+            ## using qdrant 
+            # vectorstore = Qdrant.from_documents(
+            #     documents=chunks,
+            #     embedding=embedding_model,
+            #     collection_name="simphy_guide",
+            #     # client=client
+            #     location=":memory:", # Check if this works with self.qdrantdb_path
+            # )
 
-            vectorstore = Qdrant.from_documents(
+            ## using FAISS for now
+            # vectorstore = FAISS.from_documents(
+            vectorstore = FAISS.from_documents(
                 documents=chunks,
                 embedding=embedding_model,
-                collection_name="simphy_guide",
-                # client=client
-                location=":memory:", # Check if this works with self.qdrantdb_path
-            )
+                # collection_name="simphy_guide",  # Not needed for FAISS
+            )            
             logging.info("Vector store created successfully.")
             self.vectorstore = vectorstore # Initialize the vectorstore attribute
             # Save the vectorstore to disk for later use
@@ -280,14 +301,13 @@ if __name__ == "__main__":
 
     
 
-    pdf_doc = simphy_embedding.load_pdf()
-    chunks = simphy_embedding.splitter(pdf_doc)
-    vectorstore = simphy_embedding.vector_store(chunks)
+    # pdf_doc = simphy_embedding.load_pdf()
+    # chunks = simphy_embedding.splitter(pdf_doc)
+    # vectorstore = simphy_embedding.vector_store(chunks)
 
-    if vectorstore is None:
-        logging.error("Failed to create vector store. Exiting.")
-        exit(1)
 
+    simphy_embedding.setuprag()  # Set up the RAG system
+    
     logging.info("Testing retrieval...")
     # Interactive query loop
     logging.info("Enter your queries below. Type 'quit', 'exit', or 'q' to end the session.")
