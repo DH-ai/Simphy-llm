@@ -24,6 +24,18 @@ Post filtering of rag output can help
 
 Creating a goals.md
 
+Use transformers for using deepseek-ai/coder
+
+chaining implmentation, 
+
+Memory of past sessions 
+
+UI forntend for better testing 
+
+Hosting it somewhere for above point
+
+RAG better with new model now - nuce option too of better pdf extraction 
+
 Physics aware model
 
 1. Knowlede injection
