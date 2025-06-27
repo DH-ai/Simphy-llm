@@ -281,7 +281,8 @@ class SimphyEmbedding:
                 return []
             
             retriever = self.vectorstore.as_retriever(search_kwargs={"k": k})  # Retrieve top 3 relevant documents
-            docs = retriever.get_relevant_documents(query)
+            # docs = retriever.get_relevant_documents(query)
+            docs = retriever.invoke(query)  # Use invoke to get documents
             logging.info(f"Retrieved {len(docs)} documents for query: {query}")
             return docs
         except Exception as e:

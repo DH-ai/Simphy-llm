@@ -16,3 +16,6 @@ Python version using = 3.10.12
 9. Try differnt chunking strategy long with trying 
 10. Build Multi-retriever Systems: Blend keyword-based and vector search for diverse content types. Augment LLM prompts with retrieved chunks for context-aware answers
 11. Use perplexity Resources and guides
+
+
+Need to think about the API endpoints
