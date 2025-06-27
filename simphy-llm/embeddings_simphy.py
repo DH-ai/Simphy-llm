@@ -34,7 +34,7 @@ from langchain_community.vectorstores import FAISS
 # 13. Add seperate logic for case when vectorstore is created 
 
 
-
+ALLMINILMV6 = "sentence-transformers/all-MiniLM-L6-v2"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -42,9 +42,13 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 # SimphyEmbedding class to load a PDF document, split it into chunks, and create embeddings
 class SimphyEmbedding:
-    def __init__(self, pdf_path):
+    def __init__(self, pdf_path,model_name:str=""):
         self.pdf_path = pdf_path
         self.vectorstore= None
+        self.model_name = model_name 
+        if model_name=="": self.model_name = ALLMINILMV6
+
+        
         self.qdrantdb_path = os.path.join(SCRIPT_DIR,"qdrant_data/")  # Path to store Qdrant data, can be changed to a different path if needed
 
     def setuprag(self):
@@ -227,6 +231,10 @@ class SimphyEmbedding:
                 chunk_overlap=100    # overlap to preserve context between chunks
             )
             chunks = splitter.split_documents(docs)
+            
+            # Applying chunk formatiing is a good practice
+            for chunk in chunks:
+                chunk.page_content=f"Represent this passage for retrieval: {chunk.page_content}"
             # logging.info(f"Split the document into {len(chunks)} chunks.")
             return chunks
         except Exception as e:
@@ -239,7 +247,7 @@ class SimphyEmbedding:
         """
         try:
             embedding_model = HuggingFaceEmbeddings(
-                model_name="sentence-transformers/all-MiniLM-L6-v2", # try BAAI/bge-small-en,intfloat/multilingual-e5-small
+                model_name=self.model_name, # try BAAI/bge-small-en,intfloat/multilingual-e5-small
                 model_kwargs={"device": "cuda" if torch.cuda.is_available() else "cpu"}, # Need to see about torch # Need to see about torch
                 encode_kwargs={"normalize_embeddings": True}  # Normalize embeddings for better similarity search, maybe look for cosine similarity if avail
             )
@@ -282,6 +290,9 @@ class SimphyEmbedding:
             
             retriever = self.vectorstore.as_retriever(search_kwargs={"k": k})  # Retrieve top 3 relevant documents
             # docs = retriever.get_relevant_documents(query)
+            if self.model_name!=ALLMINILMV6:
+                
+                query = f"Represent this question for searching relevant passages:{query}"
             docs = retriever.invoke(query)  # Use invoke to get documents
             logging.info(f"Retrieved {len(docs)} documents for query: {query}")
             return docs

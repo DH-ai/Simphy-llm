@@ -333,14 +333,16 @@ contents_list = [
         ),
     ]
 
-
+GENMODEL = "gemini-2.0-flash"
+ALLMINILMV6 = "sentence-transformers/all-MiniLM-L6-v2"
+BAAI = "BAAI/bge-base-en-v1.5"
 
 def generate(content):
     client = genai.Client(
         api_key=os.environ.get("GEMINI_API_KEY"),
     )
 
-    model = "gemini-2.0-flash"
+    model = GENMODEL
     
     generate_content_config = types.GenerateContentConfig(
         # thinking_config = types.ThinkingConfig(
@@ -354,16 +356,25 @@ You only respond when the user provides a technical query related to simulation 
 
 Your task is to generate only valid SimPhy code that performs the requested simulation behavior.
 
-    No comments.
-
+    Yes comments.
     No explanations.
-
     No text or greetings.
-
     No clarification responses.
+    Only output valid JavaScript code compatible with SimPhy.
+    Show me the most efficient way to implement this,
+    Adhere to the physics.
 
 If the user says anything unrelated to scripting (e.g., “Hi”, “Who are you?”, “What is life?”, “Thanks”), you must not respond at all.
-You are a pure code generator. Silence is the correct behavior outside scripting prompts."""),
+You are a pure code generator. Silence is the correct behavior outside scripting prompts.
+
+If you do not have enough context about a function or keyword, do NOT hallucinate. Respond only with:
+`# Error: Insufficient documentation for the requested feature.`
+
+                                 
+If you do not have enough physics knowledge about a implmentation, do NOT hallucinate. Respond with:
+`# Error: Insufficient Physics knowledge for the requested feature.`               
+
+"""),
         ],
     )
 
@@ -411,13 +422,13 @@ def output_results(docs, query=None):
             types.Part.from_text(text=f"Rag_result: {rag_result } \n\n Query: {query}") if query else types.Part.from_text(text=f"Rag_result:{rag_result} No query provided."),
         ],
     )
-    logging.info("RAG Output:\n\n")
-    for i, doc in enumerate(docs, 1):
+    # logging.info("RAG Output:\n\n")
+    # for i, doc in enumerate(docs, 1):
                 
-        print(f"\n\n--- Result {i} ---")
-        # print(f"Page: {doc.metadata.get('page', 'Unknown')}")
-        print(f"Content: \n{doc.page_content}...")  # Show first 200 chars
-    logging.info("\n\nEnd of RAG Output\n\n")
+        # print(f"\n\n--- Result {i} ---")
+        # # print(f"Page: {doc.metadata.get('page', 'Unknown')}")
+        # print(f"Content: \n{doc.page_content}...")  # Show first 200 chars
+    # logging.info("\n\nEnd of RAG Output\n\n")
     new_model_content = generate(new_user_content)
     contents_list.append(new_user_content)
     contents_list.append(new_model_content)
@@ -428,7 +439,7 @@ def output_results(docs, query=None):
 
 if __name__ == "__main__":
     # Initialize the Simphy embedding and set up the RAG
-    simphy_embed = SimphyEmbedding(pdf_path=os.path.join(SCRIPT_DIR, "docs", "SimpScriptGPart3.pdf"))
+    simphy_embed = SimphyEmbedding(pdf_path=os.path.join(SCRIPT_DIR, "docs", "SimpScriptGPart4Ch4.pdf"),model_name=BAAI)
     simphy_embed.setuprag()
     logging.info("Testing retrieval...")
 
@@ -446,7 +457,7 @@ if __name__ == "__main__":
 
         
         
-        docs = simphy_embed.retriever(query)
+        docs = simphy_embed.retriever(query,k=10)
         logging.info(f"Query: {query}")
         if not docs:
             logging.warning("No relevant documents found for your query.")
