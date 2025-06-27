@@ -22,4 +22,59 @@ Need to think about the API endpoints
 
 Post filtering of rag output can help
 
+Creating a goals.md
 
+Physics aware model
+
+1. Knowlede injection
+    Embed Physics principles
+    - Fine-tune/train the model
+        * Classical Mehcanics- whatever is possible in simphy
+        * API docs + examples seperately
+        * Special Curated examples
+        * Physics context maybe books with formulas need to think and discuss it with kurmi sir
+    - Using curated Datasets like
+        ```
+        physics_qa = [
+            {
+                "question": "How to set perfect elastic collisions in SimPhy?",
+                "answer": "body.setRestitution(1.0)"
+            },
+            {
+                "question": "Best joint type for pendulum?",
+                "answer": "addDistanceJoint(body, anchorPoint, frequency=30)"
+            }
+        ]
+        ```
+        
+2. Physisc-Aware promt Engineering 
+    - Basically, another prompting guide :lol
+    - Point is, prompt should be elaborate, lesser the promt more the halucination, can use simplar model run locally then imporves the promt fine tuned with promting to make it more accessible 
+    
+    - Also Custom checks
+        - Pre-generation checks:
+            ```            
+            def validate_joint_params(params):
+                if params["joint_type"] == "distance" and params["frequency"] <= 0:
+                    raise ValueError("Frequency must be positive")
+            ```
+            
+3. Output Optimization
+    - Post processing; Such that code is exceutable 
+
+4. Simulated-Tested Examples
+    
+    ## Curate a Golden Dataset
+
+    | Scenario | Code Snippet | Physics Key Points |
+    |----------|-------------|-------------------|
+    | Newton's Cradle | `World.addDistanceJoint(..., freq=30)` | Conservation of momentum |
+    | Projectile Motion | `body.applyImpulse(0, 50)` | Parabolic trajectory |
+    | Spring-Mass System | `addSpringJoint(..., stiffness=40)` | Hooke's Law (F=-kx) |
+
+5. Feedback Loop
+    1. Run generated code in simphy
+    2. Detect Physics errors
+    3. Fine-tune Based on failures ( LoRA/QLoRA)
+    4. Validation
+        - PyBullet/Mujoco for automated physics checks
