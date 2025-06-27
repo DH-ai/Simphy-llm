@@ -1,0 +1,349 @@
+{
+    "prompt": "Create a world with gravity (0, -5)",
+    "code": "World.setGravity(0,-5) ;"
+}
+
+{
+    "prompt": "Create a world with gravity (0, -10)",
+    "code": "World.setGravity(0,-10) ;"
+}
+
+{
+    "prompt": "Create a world with gravity (0, 10)",
+    "code": "World.setGravity(0,10) ;"
+}
+
+{
+    "prompt": "Create horizontal plane at position y = 4",
+    "code": "const plane1 = World.addPlane(0,4,0) ;"
+}
+
+{
+    "prompt": "Create horizontal plane at position (2,3))",
+    "code": "const plane1 = World.addPlane(2,3,0) ;"
+}
+
+{
+    "prompt": "Create horizontal plane at position x = 6, y = -1",
+    "code": "const plane1 = World.addPlane(6,-1,0) ;"
+}
+
+{
+    "prompt": "Create a vertical plane at position x = 3",
+    "code": "const plane1 = World.addPlane(3,0,90) ;"
+}
+
+{
+    "prompt": "Create a vertical plane at position x = -3",
+    "code": "const plane1 = World.addPlane(-3,0,90) ;"
+}
+
+{
+    "prompt": "Create a vertical plane at position x = 1, y = 1",
+    "code": "const plane1 = World.addPlane(1,1,90) ;"
+}
+
+{
+    "prompt": "Create a vertical plane at position x = -5 with color yellow",
+    "code": "const plane1 = World.addPlane(-5,0,90) ;
+    plane1.fillColor = 'yellow' ;"
+}
+
+{
+    "prompt": "Create a vertical plane at position (2.5, 2.5) with color black",
+    "code": "const plane1 = World.addPlane(2.5,2.5,90) ;
+    plane1.fillColor = 'black' ;"
+}
+
+{
+    "prompt": "Create a vertical plane at position (3, 4) with color grey",
+    "code": "const plane1 = World.addPlane(3,4,90) ;
+    plane1.fillColor = 'grey' ;"
+}
+
+{ 
+    "prompt": "Create a plane at position (-1,1) with angle 30 degrees", 
+    "code": "const plane1 = World.addPlane(-1,1,30) ;" 
+}
+
+{ 
+    "prompt": "Create a plane at position (3,1.5) with angle 60 degrees", 
+    "code": "const plane1 = World.addPlane(3,1.5,60) ;" 
+}
+
+{ 
+    "prompt": "Create a plane at position (1.2,4) with angle 37 degrees", 
+    "code": "const plane1 = World.addPlane(1.2,4,37) ;"
+}
+
+{ 
+    "prompt": "Create a plane at position (0,0) with angle 60 degrees and color red", 
+    "code": "const plane1 = World.addPlane(0,0,60) ;
+    plane1.fillColor = 'red' ;" 
+}
+
+{ 
+    "prompt": "Create a plane at position (-4,2) with angle 53 degrees and color green", 
+    "code": "const plane1 = World.addPlane(-4,2,53) ;
+    plane1.fillColor = 'green' ;" 
+}
+
+{ 
+    "prompt": "Create a plane at position (3,3) with angle 15 degrees and color cyan", 
+    "code": "const plane1 = World.addPlane(3,3,15) ;
+    plane1.fillColor = 'cyan' ;" 
+}
+
+{
+    "prompt" : "Create a disc at position (2,-1)", 
+    "code" : "let disc1 = World.addDisc(1);
+    disc1.setPosition(2,-1);"
+}
+
+{
+    "prompt" : "Create a disc at position (0,-1) of radius 2.5 m", 
+    "code" : "let disc1 = World.addDisc(2.5);
+    disc1.setPosition(0,-1);"
+}
+
+{
+    "prompt" : "Create a disc at position (2.5,5) of radius 1.25", 
+    "code" : "let disc1 = World.addDisc(1.25);
+    disc1.setPosition(2.5,5);"
+}
+
+{
+    "prompt" : "Create a disc at position (4,3) with radius 2.5 and color red", 
+    "code" : "let disc1 = World.addDisc(2.5);
+    disc1.setPosition(4,3);
+    disc1.setFillColor('red') ;"
+}
+
+{
+    "prompt" : "Create a disc with radius 2 and color magenta", 
+    "code" : "let disc1 = World.addDisc(2);
+    disc1.setPosition(0,0);
+    disc1.setFillColor('magenta') ;"
+}
+
+{
+    "prompt" : "Create a disc at position (5,-4) with radius 2 and color red", 
+    "code" : "let disc1 = World.addDisc(2);
+    disc1.setPosition(5,-4);
+    disc1.setFillColor('red') ;"
+}
+
+{
+    "prompt" : "Create a disc with radius 2.3 and color blue and mass 1", 
+    "code" : "let disc1 = World.addDisc(2.3);
+    disc1.setPosition(0,0);
+    disc1.setMass(1);
+    disc1.setFillColor('blue') ;"
+}
+
+{
+    "prompt" : "Create a disc at position (3,3) with radius 0.75 and color pink and mass 2", 
+    "code" : "let disc1 = World.addDisc(0.75);
+    disc1.setPosition(3,3);
+    disc1.setMass(2);
+    disc1.setFillColor('pink') ;"
+}
+
+{
+    "prompt" : "Create a disc at position (-1,3) with radius 1.5 and color yellow and mass 1", 
+    "code" : "let disc1 = World.addDisc(-1.5);
+    disc1.setPosition(0,0);
+    disc1.setMass(1.5);
+    disc1.setFillColor('yellow') ;"
+}
+
+{
+    "prompt" : "Create a disc with radius 1 and color blue and mass 1 and velocity (3,4)", 
+    "code" : "let disc2 = World.addDisc(1);
+    disc2.setPosition(0,0);
+    disc2.setMass(1);
+    disc2.setFillColor('blue') ;
+    disc2.setVelocity(3, 4);"
+}
+
+{
+    "prompt" : "Create a disc at position (3,4) with radius 0.5 and color red and mass 2 and velocity (6,8)", 
+    "code" : "let disc3 = World.addDisc(0.5);
+    disc3.setPosition(3,4);
+    disc3.setMass(2);
+    disc3.setFillColor('red') ;
+    disc3 .setVelocity(6, 8);"
+}
+
+{
+    "prompt" : "Create a disc at position (1,0) with radius 0.25 and color cyan and mass 0.25 and velocity (5,5)", 
+    "code" : "let disc1 = World.addDisc(0.25);
+    disc1.setPosition(1,0);
+    disc1.setMass(0.25);
+    disc1.setFillColor('cyan') ;
+    disc1.setVelocity(5,5);"
+}
+
+{
+    "prompt" : "Create a disc with radius 1 and color red and mass 1.5 and velocity (6,6) and angular velocity -0.5", 
+    "code" : "let disc1 = World.addDisc(1);
+    disc1.setPosition(0,0);
+    disc1.setMass(1.5);
+    disc1.setFillColor('red') ;
+    disc1.setVelocity(6, 6);
+    disc1.setAngularVelocity(-0.5);"
+}
+
+{
+    "prompt" : "Create a disc at position (4,7) with radius 4 and color yellow and mass 8 and velocity (4,3) and angular velocity (1)", 
+    "code" : "let disc = World.addDisc(4);
+    disc.setPosition(4,7);
+    disc.setMass(8);
+    disc.setFillColor('yellow') ;
+    disc.setVelocity(4, 3);
+    disc.setAngularVelocity(1);"
+}
+
+{
+    "prompt" : "Create a disc at position (-1,-3) with radius 3 and color blue and mass 3 and velocity (7,5) and angular velocity (-4)", 
+    "code" : "let ball = World.addDisc(3);
+    ball.setPosition(-1,-3);
+    ball.setMass(3);
+    ball.setFillColor('blue') ;
+    ball.setVelocity(7,5);
+    ball.setAngularVelocity(-4);"
+}
+
+{
+    "prompt": "Create a triangular wedge with sides 3,4 and 5" , 
+    "code":"let wedge1 = World.addPolygon([new Vector2(0,0),new Vector2(3,0),new Vector2(3,4)]);"
+}
+
+{
+    "prompt": "Create a triangular wedge with sides 4, 3 and 5" , 
+    "code":"let wedge1 = World.addPolygon([new Vector2(0,0),new Vector2(4,0),new Vector2(4,3)]);"
+}
+
+{
+    "prompt": "Create a triangular wedge with sides 6, 8 and 10" , 
+    "code":"let wedge1 = World.addPolygon([new Vector2(0,0),new Vector2(6,0),new Vector2(6,8)]);"
+}
+
+{
+    "prompt": "Create a triangular wedge with mass 3" , 
+    "code":"let wedge1 = World.addPolygon([new Vector2(0,0),new Vector2(4,0),new Vector2(4,3)]);
+    wedge1.setMass(3);"
+}
+
+{
+    "prompt": "Create a triangular wedge with sides 6, 8 and 10 and mass 5" , 
+    "code":"let wedge1 = World.addPolygon([new Vector2(0,0),new Vector2(6,0),new Vector2(6,8)]);
+    wedge1.setMass(5);"
+}
+
+{
+    "prompt": "Create a triangular wedge with mass 2 and color blue" , 
+    "code":"let wedge1 = World.addPolygon([new Vector2(0,0),new Vector2(4,0),new Vector2(4,3)]);
+    wedge1.setMass(2);
+    wedge1.setFillColor('blue');"
+}
+
+{
+    "prompt": "Create a triangular wedge with sides 6,8 and 10 and with mass 6 and color green" , 
+    "code":"let wedge1 = World.addPolygon([new Vector2(0,0),new Vector2(6,0),new Vector2(6,8)]);
+    wedge1.setMass(6);
+    wedge1.setFillColor('green');"
+}
+
+{
+    "prompt": "Create a triangular wedge with sides 3,4 and 5 and with mass 5 and color cyan" , 
+    "code":"let wedge1 = World.addPolygon([new Vector2(0,0),new Vector2(3,0),new Vector2(3,4)]);
+    wedge1.setMass(5);
+    wedge1.setFillColor('cyan');"
+}
+
+{
+    "prompt": "Create a fixed triangular wedge with sides 3,4 and 5" , 
+    "code":"let wedge1 = World.addPolygon([new Vector2(0,0),new Vector2(3,0),new Vector2(3,4)]);
+    wedge1.setMass(0);"
+}
+
+{
+    "prompt": "Create a fixed triangular wedge with sides 6,8 and 10 and color blue" , 
+    "code":"let wedge1 = World.addPolygon([new Vector2(0,0),new Vector2(6,0),new Vector2(6,8)]);
+    wedge1.setMass(0);
+    wedge1.setFillColor('blue');"
+}
+
+{
+    "prompt": "Create a fixed triangular wedge with sides .6, .8 and 1 and color yellow" , 
+    "code":"let wedge1 = World.addPolygon([new Vector2(0,0),new Vector2(.6 , 0),new Vector2(.6 , .8)]);
+    wedge1.setMass(0);
+    wedge1.setFillColor('yellow');"
+}
+
+{
+    "prompt": "Create 2 discs at position (0,0) and (2,0) of radius 1 each and attach them with spring joint" , 
+    "code":"const disc1 = World.addDisc(1) ;
+    const disc2 = World.addDisc(1);
+    disc2.setPosition(2, 0) ;
+
+    //addSpring Joint takes arguments as (SimphyBody , SimphyBody , Vector2 , Vector2 , Double SpringConstant, Double (damping Coefficient))
+    const springJoint1 = World.addSpringJoint(disc1, disc2, null , null, 30 , 0) ;"
+}
+
+{
+    "prompt": "Create 2 discs at position (2,3) and (3,2) and attach them with spring joint" , 
+    "code":"const disc1 = World.addDisc(1) ;
+    disc1.setPosition(2, 3) ;
+    const disc2 = World.addDisc(1);
+    disc2.setPosition(3, 2) ;
+
+    //addSpring Joint takes arguments as (SimphyBody , SimphyBody , Vector2 , Vector2 , Double SpringConstant, Double (damping Coefficient))
+    const springJoint1 = World.addSpringJoint(disc1, disc2, null , null, 30, 0) ;"
+}
+
+{
+    "prompt": "Create 2 discs at position (-4,0) and (4,0) of radius 3 each and attach them with spring joint" , 
+    "code":"const disc1 = World.addDisc(0.5) ;
+    disc1.setPosition(-4,0 ;
+    const disc2 = World.addDisc(1);
+    disc2.setPosition(4,0) ;
+
+    //addSpring Joint takes arguments as (SimphyBody , SimphyBody , Vector2 , Vector2 , Double SpringConstant, Double (damping Coefficient))
+    const springJoint1 = World.addSpringJoint(disc1, disc2, null , null, 30, 0) ;"
+}
+
+{
+    "prompt": "Create a disc at position (2,2) attach it with rod joint on the background",
+    "code": "const disc1 = World.addDisc(1) ;
+    disc2.setPosition(2, 2) ;
+
+    const ropeJoint1 = World.addDistanceJoint(disc1, null, null , new Vector2(0,0));"
+}
+
+{
+    "prompt": "Create a ball and attach it with rod joint to a fixed point (3,4)",
+    "code": "const disc1 = World.addDisc(1) ;
+
+    const ropeJoint1 = World.addDistanceJoint(disc1, null, null , new Vector2(3,4));"
+}
+
+{
+    "prompt": "Create a disc at position (-2,0) of radius 2 and attach it to a fixed point (-2,2) with a rope joint",
+    "code": "let disc1 = World.addDisc(2);
+    disc1.setPosition(-2, 0) ;
+
+    /**
+     * World.addRopeJoint adds {@link RopeJoint} between bodies
+     * @param body1 {Body} first body, Pass <code>null</code> to add anchor point to world
+     * @param body2 {Body} second body, Pass <code>null</code>  to add anchor point to world
+     * @param p1 {Vector2} first anchor point in world coordinates , Pass <code>null</code>  to add to center of mass of body
+     * @param p2 {Vector2} second anchor point in world coordinates , Pass <code>null</code>  to add to center of mass of body
+     * @return {RopeJoint} added joint with natural length set as distance between anchor points
+     */
+    let ropeJoint = World.addRopeJoint(disc1, null, null, new Vector2(-2,2));"
+}
+
+
+

@@ -411,6 +411,13 @@ def output_results(docs, query=None):
             types.Part.from_text(text=f"Rag_result: {rag_result } \n\n Query: {query}") if query else types.Part.from_text(text=f"Rag_result:{rag_result} No query provided."),
         ],
     )
+    logging.info("RAG Output:\n\n")
+    for i, doc in enumerate(docs, 1):
+                
+        print(f"\n\n--- Result {i} ---")
+        # print(f"Page: {doc.metadata.get('page', 'Unknown')}")
+        print(f"Content: \n{doc.page_content}...")  # Show first 200 chars
+    logging.info("\n\nEnd of RAG Output\n\n")
     new_model_content = generate(new_user_content)
     contents_list.append(new_user_content)
     contents_list.append(new_model_content)
