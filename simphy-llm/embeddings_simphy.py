@@ -1,5 +1,4 @@
 # simphy-llm/embeddings_simphy.py
-# from langchain.document_loaders import PyPDFLoader ## deprecated 
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 # from langchain.embeddings import HuggingFaceEmbeddings # Deprecated, use langchain_community.embeddings instead

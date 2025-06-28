@@ -5,3 +5,6 @@ __pychache__
 *.pyd
 *.db
 *.sqlite3           
+
+*.pkl
+*.faiss
