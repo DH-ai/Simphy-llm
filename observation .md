@@ -18,7 +18,7 @@ Python version using = 3.10.12
 11. Use perplexity Resources and guides
 
 
-Need to think about the API endpoints
+Need to think about the API endpoints 
 
 Post filtering of rag output can help
 

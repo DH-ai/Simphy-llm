@@ -272,6 +272,7 @@ class SimphyEmbedding:
                 # collection_name="simphy_guide",  # Not needed for FAISS
             )            
             logging.info("Vector store created successfully.")
+            
             self.vectorstore = vectorstore # Initialize the vectorstore attribute
             # Save the vectorstore to disk for later use
             return vectorstore

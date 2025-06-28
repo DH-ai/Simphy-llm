@@ -1,0 +1,1 @@
+# Constants like model names and path
