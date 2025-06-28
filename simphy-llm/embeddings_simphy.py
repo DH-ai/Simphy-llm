@@ -17,20 +17,6 @@ import torch
 import argparse
 from langchain_community.vectorstores import FAISS
 
-## thigns to do
-# 1. Store the embeddings model locally, so that it can be reused without reloading
-# 4  Store the embeddings in a vector store, such as Qdrant or FAISS for now qdrant
-# 5. Add a method to save the vector store to disk for later use
-# 6. Add a method to load the vector store from disk
-# 2. Add a method to search the vector store with a query and return relevant documents that might be a method for the retrivar class
-# 7. Add a method to update the vector store with new documents
-# 3. Add error handling for file loading and embedding processes
-# 8. Add a method to delete documents from the vector store
-# 9. Need to see the docket and internet version of the qdrant client, for now using in-memory for testing
-# 10. Add a method to clear the vector store
-# 11. Add a method to modify the metadata of individual chunksi
-# 12. Add command-line argument parsing for PDF path
-# 13. Add seperate logic for case when vectorstore is created 
 
 
 ALLMINILMV6 = "sentence-transformers/all-MiniLM-L6-v2"
@@ -302,7 +288,7 @@ class SimphyEmbedding:
 
 
         
-#Seeing the vector 
+#Seeing the vector - DONE
 
 if __name__ == "__main__":
 

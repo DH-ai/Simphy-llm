@@ -22,7 +22,8 @@ from time import time
 # So currently we are saving the embeddings model not the embeddings themselves therefore we are facing almost 
 # same runtime, if we generate the embeddings there is no need of embeddings model, means no embeddings making from chunks therefare faster runtime
 # Now we need to figure how we are going to store the embeddings -> maybe we did storing the entire vectore store damn
-# can cache huggingface embeddings model cache folder arg to huggingface embeddings class -> further development says that saving vector store is 
+# can cache huggingface embeddings model cache folder arg to huggingface embeddings class -> further development says that saving vector store is not that efficient too took 4 seconds equival
+# - to the first approach, noew we will try other approach will also enable caching
 # time = time.time()
 def vector_store( chunks)-> FAISS| None:
         """
