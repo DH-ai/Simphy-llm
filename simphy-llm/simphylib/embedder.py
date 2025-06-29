@@ -18,7 +18,7 @@ class EmbeddingsSimphy:
     """
     Class to handle embedding generation and vector store creation using HuggingFace embeddings.
     """
-    def __init__(self, model_name="BAAI/bge-small-en", qdrantdb_path=None):
+    def __init__(self, model_name="BAAI/bge-base-en-v1.5", qdrantdb_path=None):
         self.model_name = model_name
         self.qdrantdb_path = qdrantdb_path if qdrantdb_path else ":memory:"  # Default to in-memory if no path is provided
         self.vectorstore = None  # Initialize vectorstore attribute
@@ -42,7 +42,7 @@ class EmbeddingsSimphy:
                     model_name=self.model_name,
                     model_kwargs={"device": "cuda" if torch.cuda.is_available() else "cpu"},
                     encode_kwargs={"normalize_embeddings": True},  # Normalize embeddings for better similarity search
-                    show_progress=True,
+                    # show_progress=True,
                       # Show progress bar during embedding generation)
                 )
                 vectorstore = FAISS.from_documents(
