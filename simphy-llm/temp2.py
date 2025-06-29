@@ -108,20 +108,22 @@ def create_vectorstore(chunks):
     Create vectorstore for the given chunks of text.
     """
     try:
+        t = time()
         embedding_model = HuggingFaceEmbeddings(
             model_name="BAAI/bge-base-en-v1.5",
             model_kwargs={"device": "cuda" if torch.cuda.is_available() else "cpu"},
             encode_kwargs={"normalize_embeddings": True},
             show_progress=True,  # Show progress bar during embedding generation
-            multi_process=True,  # Use multiple processes for faster embedding generation
+            # multi_process=True,  # Use multiple processes for faster embedding generation
             # Note: multi_process=True is not supported in all environments,
 
               # Normalize embeddings for better similarity search
         )
-        # Generate embeddings for each chunk
+        print("Time req to run embedding model: {t}".format(t= time()-t))  # Generate embeddings for each chunk
+        t = time()
         embeddings = embedding_model.embed_documents([chunk.page_content for chunk in chunks])
         # logging.info("Embeddings created successfully.")
-        
+        print("Time req to create embeddings: {t}".format(t=time() - t))
 
         return embeddings
     except Exception as e:
@@ -160,13 +162,13 @@ test_docs = [
 
 # create_vectorstore_from_embeddigs(create_vectorstore(test_docs), test_docs)
 t = time()
-vc= vector_store(test_docs)
-print("Time req to run vector")
+vc= create_vectorstore(test_docs)
+print("Time req to run functino")
 print(time() - t)
-if vc is not None:
-    retriever = vc.as_retriever(search_type="similarity", search_kwargs={"k": 1})
-    t = time()
+# if vc is not None:
+#     retriever = vc.as_retriever(search_type="similarity", search_kwargs={"k": 1})
+#     t = time()
 
-    print(retriever.invoke("most historical documetns"))
-    print("Time req to run search : {t}".format(t=time() - t))
+#     print(retriever.invoke("most historical documetns"))
+#     print("Time req to run search : {t}".format(t=time() - t))
 
