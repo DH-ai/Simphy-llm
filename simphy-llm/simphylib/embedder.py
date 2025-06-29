@@ -9,9 +9,9 @@ from langchain_core.documents import Document
 import os
 import logging
 import os 
-from simphylib.config import CACHED_INDEX_PATH
+# from simphylib.config import CACHED_INDEX_PATH
 import pickle
-
+CACHED_INDEX_PATH = "vectorstore_new.pkl"  # Path to save the cached vector store
 
 logger = logging.getLogger(__name__)
 class EmbeddingsSimphy:
@@ -53,13 +53,28 @@ class EmbeddingsSimphy:
                 # embeddings = embedding_model.embed_documents([chunk.page_content for chunk in chunks])
                 # logging.info("Embeddings created successfully.")
                 self.vectorstore = vectorstore # Initialize the vectorstore attribute
+                
+                
                 with open(CACHED_INDEX_PATH, "wb") as f:
                     pickle.dump(vectorstore, f)
                 return vectorstore
             except Exception as e:
                 logging.error(f"Failed to create embeddings: {e}")
+                
                 return None
 
+    def load_vectorstore(self)->FAISS |None:
+        """Load the vectorstore from disk."""
+        try:
+            if not os.path.exists(CACHED_INDEX_PATH):
+                raise FileNotFoundError(f"Vector store file not found at {CACHED_INDEX_PATH}")
+            with open(CACHED_INDEX_PATH, "rb") as f:
+                self.vectorstore = pickle.load(f)
+            logger.info("Vector store loaded successfully.")
+            return self.vectorstore
+        except Exception as e:
+            logger.error(f"Failed to load vector store: {e}")
+            return None
     def check_vectorstore(self):
         """Check if the vectorstore is already created."""
         if os.path.exists(CACHED_INDEX_PATH):

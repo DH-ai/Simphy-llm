@@ -8,10 +8,10 @@ class RetrieverSimphy:
     Class to handle retrieval of documents using a vector store.
     """
     
-    def __init__(self, vectorstore):
-        self.vectorstore:FAISS = vectorstore
+    def __init__(self, vectorstore: FAISS|None = None):
+        self.vectorstore:FAISS|None = vectorstore
 
-    def retrieve(self, query, k=5)->Document:
+    def retrieve(self, query, k=5)->list[Document]:
         """
         Retrieve documents based on the query.
         

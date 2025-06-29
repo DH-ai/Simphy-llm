@@ -1,27 +1,23 @@
-from dotenv import load_dotenv
-load_dotenv()
-
-
-# import embeddings_simphy
-from embeddings_simphy import SimphyEmbedding
-from embeddings_simphy import SCRIPT_DIR
-
-
-import logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-
-import base64
+from simphylib.splitter import PDFChunker
+from simphylib.embedder import EmbeddingsSimphy
+from simphylib.retriever import RetrieverSimphy
+from simphylib.config import *
 import os
 from google import genai
 from google.genai import types
+from dotenv import load_dotenv
+load_dotenv()
+import logging  
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%H:%M:%S')
 
-    
+from typing import List, Union
 
-## Need to figure out this chaining thing
-# simphy-llm/embeddings_simphy.py
-# from langchain.document_loaders import PyPDFLoader ## deprecated 
+def formater(cont):
+    return cont
+from main_config import SCRIPT_DIR,SYSTEM_INSTRUCTION
 
+## This is needed for chaining, or mememory, can save on disk and load later,
+## also can retrive data in case of similar query, or can use it to train the model, maybe in a json format
 contents_list = [
         types.Content(
             role="user",
@@ -83,6 +79,7 @@ contents_list = [
     """),
             ],
         ),
+
         types.Content(
             role="model",
             parts=[
@@ -333,11 +330,9 @@ contents_list = [
         ),
     ]
 
-GENMODEL = "gemini-2.0-flash"
-ALLMINILMV6 = "sentence-transformers/all-MiniLM-L6-v2"
-BAAI = "BAAI/bge-base-en-v1.5"
 
 def generate(content):
+    """Generate content using the Gemini API."""
     client = genai.Client(
         api_key=os.environ.get("GEMINI_API_KEY"),
     )
@@ -350,45 +345,11 @@ def generate(content):
         # ),
         response_mime_type="text/plain",
         system_instruction=[
-            types.Part.from_text(text="""You are SLiPi, an AI assistant designed exclusively to write SimPhy simulation scripts.
-
-You only respond when the user provides a technical query related to simulation scripting. This query is accompanied by relevant documentation (retrieved via RAG).
-
-Your task is to generate only valid SimPhy code that performs the requested simulation behavior.
-
-    Yes comments.
-    Explan Your reasoning at the end of the code in comments.
-    No text or greetings.
-    No clarification responses.
-    Only output valid JavaScript code compatible with SimPhy.
-    Show me the most efficient way to implement this,
-    Adhere to the physics.
-
-If the user says anything unrelated to scripting (e.g., “Hi”, “Who are you?”, “What is life?”, “Thanks”), you must not respond at all.
-You are a pure code generator. Silence is the correct behavior outside scripting prompts.
-
-If you do not have enough context about a function or keyword, do NOT hallucinate. Respond only with:
-`# Error: Insufficient documentation for the requested feature.`
-
-                                 
-If you do not have enough physics knowledge about a implmentation, do NOT hallucinate. Respond with:
-`# Error: Insufficient Physics knowledge for the requested feature.`               
-
-"""),
+            types.Part.from_text(text=SYSTEM_INSTRUCTION),
         ],
     )
 
 
-    # response = client.models.generate_content(
-    #     model=model,
-    #     contents=content,
-    #     config=generate_content_config,
-    # )
-
-    # model_output = "".join([chunk.text for chunk in response])
-
-    # Step 3: Create model response
-    
 
     model_output_temp=""
     for chunk in client.models.generate_content_stream(
@@ -398,50 +359,63 @@ If you do not have enough physics knowledge about a implmentation, do NOT halluc
     ):
         model_output_temp = model_output_temp +"\n" +str(chunk.text)
         
+    resposne = formater(model_output_temp)
     
     new_model_content = types.Content(
         role="model",
-        parts=[types.Part.from_text(text= model_output_temp)]
+        parts=[types.Part.from_text(text= resposne)]
     )
-    logging.info("Model Output:\n\n")
-    print(model_output_temp )
-    logging.info("\n\nEnd of Model Output\n\n")
+    
     return new_model_content
-    #     print(chunk.text, end="")
+
 
 def output_results(docs, query=None):
     """Format and print the retrieved documents."""
+    # assert isinstance(docs, list), "docs should be a list of Document objects"
+    # assert query is None or isinstance(query, str), "query should be a string or None"
+    
 
-
-    # format docs first 
-
-    rag_result = "\n".join([f"Page {doc.metadata.get('page', 'N/A')}: \n Content:{doc.page_content}" for doc in docs])
+    rag_result = "\n".join(["Content:{doc.page_content}" for doc in docs])
     new_user_content = types.Content(
         role="user",
         parts=[
             types.Part.from_text(text=f"Rag_result: {rag_result } \n\n Query: {query}") if query else types.Part.from_text(text=f"Rag_result:{rag_result} No query provided."),
         ],
     )
-    # logging.info("RAG Output:\n\n")
-    # for i, doc in enumerate(docs, 1):
-                
-        # print(f"\n\n--- Result {i} ---")
-        # # print(f"Page: {doc.metadata.get('page', 'Unknown')}")
-        # print(f"Content: \n{doc.page_content}...")  # Show first 200 chars
-    # logging.info("\n\nEnd of RAG Output\n\n")
+    
     new_model_content = generate(new_user_content)
-    contents_list.append(new_user_content)
-    contents_list.append(new_model_content)
+
+    logging.info(f"Result of the query: {query}\n\n".format(query=query))
+    if not new_model_content:print(new_model_content.parts)
+    logging.info("\n\nEnd of SLiPI Outout ")
     
 
 
    
 
 if __name__ == "__main__":
-    # Initialize the Simphy embedding and set up the RAG
-    simphy_embed = SimphyEmbedding(pdf_path=os.path.join(SCRIPT_DIR, "docs", "SimpScriptGPart4Ch4.pdf"),model_name=BAAI)
-    simphy_embed.setuprag()
-    logging.info("Testing retrieval...")
+    
+
+
+    
+    logging.info("This is SLiPI, your SimPhy Scripting Assistant.")
+    logging.info("Loading PDF and creating vector store...")
+    if not PDFChunker().check_vectorstore_before_load():
+        pdf_chunker = PDFChunker(pdf_path=SCRIPT_DIR+"/docs/SimpScriptGPart4Ch4.pdf", chunk_size=1000, chunk_overlap=100)
+        pdf_chunker.load()
+        pdf_chunker.split()
+        chunks = pdf_chunker.format_chunks()
+        embedder = EmbeddingsSimphy(model_name=HUGGINGFACE_EMBEDDING_MODEL_BAAI)
+        vectorstore = embedder.create_vectorstore(chunks)
+    else:
+        logging.info("Vector store already exists. Loading from cache...")
+        embedder = EmbeddingsSimphy(model_name=HUGGINGFACE_EMBEDDING_MODEL_BAAI)
+        vectorstore = embedder.load_vectorstore()
+    if vectorstore is None:
+        logging.error("Failed to load vector store. Exiting.")
+        exit(1)
+    retriever = RetrieverSimphy(vectorstore=vectorstore)
+    
 
     logging.info("Enter your queries below. Type 'quit', 'exit', or 'q' to end the session.")
     while True:
@@ -457,12 +431,16 @@ if __name__ == "__main__":
 
         
         
-        docs = simphy_embed.retriever(query,k=10)
-        logging.info(f"Query: {query}")
-        if not docs:
-            logging.warning("No relevant documents found for your query.")
-        else:
-            output_results(docs,query)
+        doc = retriever.retrieve(query=query, k=7)
+
+        logging.info(f"Result of the query: {query}\n\n".format(query=query))
+        for i, doc in enumerate(doc, 1):
+                
+                print(f"\n\n--- Result {i} ---\n\n")
+                print(f"Page: {doc.metadata.get('page', 'Unknown')}")
+                print(f"Content: \n{doc.page_content}...")
+        logging.info("\n\n End of RAG Outout ")
+        output_results(doc,query)
 
             
 
