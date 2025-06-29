@@ -359,11 +359,11 @@ def generate(content):
     ):
         model_output_temp = model_output_temp +"\n" +str(chunk.text)
         
-    resposne = formater(model_output_temp)
-    
+    # resposne = formater(model_output_temp)
+    print(model_output_temp)
     new_model_content = types.Content(
         role="model",
-        parts=[types.Part.from_text(text= resposne)]
+        parts=[types.Part.from_text(text= model_output_temp)]
     )
     
     return new_model_content
@@ -371,8 +371,8 @@ def generate(content):
 
 def output_results(docs, query=None):
     """Format and print the retrieved documents."""
-    # assert isinstance(docs, list), "docs should be a list of Document objects"
-    # assert query is None or isinstance(query, str), "query should be a string or None"
+    assert isinstance(docs, list), "docs should be a list of Document objects"
+    assert query is None or isinstance(query, str), "query should be a string or None"
     
 
     rag_result = "\n".join(["Content:{doc.page_content}" for doc in docs])
@@ -385,9 +385,9 @@ def output_results(docs, query=None):
     
     new_model_content = generate(new_user_content)
 
-    logging.info(f"Result of the query: {query}\n\n".format(query=query))
-    if not new_model_content:print(new_model_content.parts)
-    logging.info("\n\nEnd of SLiPI Outout ")
+    # logging.info(f"Result of the query: {query}\n\n".format(query=query))
+    # if not new_model_content:print(new_model_content.parts)
+    # logging.info("\n\nEnd of SLiPI Outout ")
     
 
 
@@ -403,8 +403,8 @@ if __name__ == "__main__":
     if not PDFChunker().check_vectorstore_before_load():
         pdf_chunker = PDFChunker(pdf_path=SCRIPT_DIR+"/docs/SimpScriptGPart4Ch4.pdf", chunk_size=1000, chunk_overlap=100)
         pdf_chunker.load()
-        pdf_chunker.split()
-        chunks = pdf_chunker.format_chunks()
+        chunks = pdf_chunker.split()
+        # chunks = pdf_chunker.format_chunks()
         embedder = EmbeddingsSimphy(model_name=HUGGINGFACE_EMBEDDING_MODEL_BAAI)
         vectorstore = embedder.create_vectorstore(chunks)
     else:
@@ -434,11 +434,11 @@ if __name__ == "__main__":
         doc = retriever.retrieve(query=query, k=7)
 
         logging.info(f"Result of the query: {query}\n\n".format(query=query))
-        for i, doc in enumerate(doc, 1):
+        for i, doc2 in enumerate(doc, 1):
                 
                 print(f"\n\n--- Result {i} ---\n\n")
-                print(f"Page: {doc.metadata.get('page', 'Unknown')}")
-                print(f"Content: \n{doc.page_content}...")
+                print(f"Page: {doc2.metadata.get('page', 'Unknown')}")
+                print(f"Content: \n{doc2.page_content}...")
         logging.info("\n\n End of RAG Outout ")
         output_results(doc,query)
 

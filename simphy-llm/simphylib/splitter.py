@@ -62,9 +62,11 @@ class PDFChunker:
             chunk_overlap=self.chunk_overlap
         )
         self.chunks = splitter.split_documents(self.docs)
+        for chunk in self.chunks:
+            chunk.page_content= f"Represent this passage for retrieval: {chunk.page_content}"
         return self.chunks
 
-    def format_chunks(self, prefix="Represent this question for searching relevant passages: "):
+    def format_chunks(self, prefix="Represent this passage for retrieval: "):
         for chunk in self.chunks:
             chunk.page_content = f"{prefix}{chunk.page_content}"
         return self.chunks

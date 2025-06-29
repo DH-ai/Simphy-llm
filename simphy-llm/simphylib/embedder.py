@@ -42,7 +42,8 @@ class EmbeddingsSimphy:
                     model_name=self.model_name,
                     model_kwargs={"device": "cuda" if torch.cuda.is_available() else "cpu"},
                     encode_kwargs={"normalize_embeddings": True},  # Normalize embeddings for better similarity search
-                    show_progress=True,  # Show progress bar during embedding generation)
+                    show_progress=True,
+                      # Show progress bar during embedding generation)
                 )
                 vectorstore = FAISS.from_documents(
                     documents=chunks,

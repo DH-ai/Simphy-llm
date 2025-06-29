@@ -14,7 +14,7 @@ Your task is to generate only valid SimPhy code that performs the requested simu
     no comments.
     Explan Your reasoning at the end of the code in comments.
     No text or greetings.
-    No clarification responses.
+    
     Only output valid JavaScript code compatible with SimPhy.
     Show the most efficient way to implement solution,
     Adhere to the physics.
@@ -30,3 +30,4 @@ If you do not have enough physics knowledge about a implmentation, do NOT halluc
 `# Error: Insufficient Physics knowledge for the requested feature.`               
 
 """
+

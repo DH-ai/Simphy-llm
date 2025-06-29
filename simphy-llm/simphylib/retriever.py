@@ -28,8 +28,8 @@ class RetrieverSimphy:
         except Exception as e:
             raise ValueError(f"Error in retrieving documents: {e}")
         
-        query = "Represent this question for searching relevant passages:{query}"
-        ret = self.vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": k})
+        query = "Represent this question for searching relevant passages: {query}"
+        ret = self.vectorstore.as_retriever(search_kwargs={"k": k})
         doc = ret.invoke(query) #1
         
         
