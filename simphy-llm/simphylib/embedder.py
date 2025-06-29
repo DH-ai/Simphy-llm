@@ -78,12 +78,13 @@ class EmbeddingsSimphy:
             return None
     def check_vectorstore(self):
         """Check if the vectorstore is already created."""
-        if os.path.exists(CACHED_INDEX_PATH):
-            # logger.info("Vector store already exists.")
-            return True
-        else:
-            # logger.warning("No vector store found. Please create one first.")
-            return False
+        # if os.path.exists(CACHED_INDEX_PATH):
+        #     # logger.info("Vector store already exists.")
+        #     return True
+        # else:
+        #     # logger.warning("No vector store found. Please create one first.")
+        #     return False
+        return False
     
 
 
