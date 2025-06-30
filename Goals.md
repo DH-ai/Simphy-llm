@@ -97,3 +97,14 @@ Physics aware model
     3. Fine-tune Based on failures ( LoRA/QLoRA)
     4. Validation
         - PyBullet/Mujoco for automated physics checks
+
+
+A query rewriting model (e.g., self-ask, REACT, or just GPT-style prompt)
+
+A loop (manual or rule-based) that:
+
+- tracks current context
+
+- decides when to stop querying
+
+“query → rag → refine → better query → better rag → final result”

@@ -6,14 +6,24 @@ import os
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
+import json
 load_dotenv()
 import logging  
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%H:%M:%S')
 
 from typing import List, Union
 
-def formater(cont):
-    return cont
+def formater(text) -> str:
+    """Format the text for better readability."""
+    # Remove leading and trailing whitespace
+    print(text)
+    text = json.decoder.JSONDecoder().decode(text)
+    print(text)
+    
+        # Replace multiple newlines with a single newline
+    # text = "\n".join(line.strip() for line in text.splitlines() if line.strip())
+    return text
+    
 from main_config import SCRIPT_DIR,SYSTEM_INSTRUCTION
 
 ## This is needed for chaining, or mememory, can save on disk and load later,
@@ -340,31 +350,46 @@ def generate(content):
     model = GENMODEL
     
     generate_content_config = types.GenerateContentConfig(
-        # thinking_config = types.ThinkingConfig(
-        #     thinking_budget=-1,
-        # ),
         response_mime_type="text/plain",
         system_instruction=[
             types.Part.from_text(text=SYSTEM_INSTRUCTION),
         ],
+        temperature=0,
+        candidate_count=1,
+        # response_mime_type="application/json",
+        top_p=0.63,
+        top_k=20,
+        seed=1,
+        max_output_tokens=300,
+        # stop_sequences=["STOP!"],
+        # presence_penalty=0.0,
+        frequency_penalty=1.2,
+        # num_beams=1,
     )
 
-
-
-    model_output_temp=""
-    for chunk in client.models.generate_content_stream(
+    response = client.models.generate_content(
         model=model,
         contents=content,
         config=generate_content_config,
-    ):
-        model_output_temp = model_output_temp +"\n" +str(chunk.text)
+    )
+    # formater(response.text)
+    print(response.text)
+    model_output_temp=""
+    # for chunk in client.models.generate_content_stream(
+    #     model=model,
+    #     contents=content,
+    #     config=generate_content_config,
+    # ):
+    #     modell_output_temp = model_output_temp +"\n" +str(chunk.text)
         
     # resposne = formater(model_output_temp)
-    print(model_output_temp)
+    # print(model_output_temp)
     new_model_content = types.Content(
         role="model",
         parts=[types.Part.from_text(text= model_output_temp)]
     )
+
+    
     
     return new_model_content
 
@@ -375,23 +400,24 @@ def output_results(docs, query=None):
     assert query is None or isinstance(query, str), "query should be a string or None"
     
 
-    rag_result = "\n".join(["Content:{doc.page_content}" for doc in docs])
+    rag_result = "\n".join([f"Content:{doc.page_content}"for doc in docs])
+    # print(rag_result)
     new_user_content = types.Content(
         role="user",
         parts=[
-            types.Part.from_text(text=f"Rag_result: {rag_result } \n\n Query: {query}") if query else types.Part.from_text(text=f"Rag_result:{rag_result} No query provided."),
+            types.Part.from_text(text=f"Rag_result: {rag_result} \n\n Query: {query}") 
         ],
     )
-    
+    # print(new_user_content.parts)
     new_model_content = generate(new_user_content)
 
-    # logging.info(f"Result of the query: {query}\n\n".format(query=query))
-    # if not new_model_content:print(new_model_content.parts)
-    # logging.info("\n\nEnd of SLiPI Outout ")
+    logging.info(f"Result of the query: {query}\n\n".format(query=query))
+    if not new_model_content:print("-"*17 + "\n" +"{t}".format(t = new_model_content.parts[0]) +"\n"+"-"*17 )
+    logging.info("\n\nEnd of SLiPI Outout ")
     
 
 
-   
+ 
 
 if __name__ == "__main__":
     
@@ -400,17 +426,17 @@ if __name__ == "__main__":
     
     logging.info("This is SLiPI, your SimPhy Scripting Assistant.")
     logging.info("Loading PDF and creating vector store...")
-    if not PDFChunker().check_vectorstore_before_load():
-        pdf_chunker = PDFChunker(pdf_path=SCRIPT_DIR+"/docs/SimpScriptGPart4Ch4.pdf", chunk_size=1000, chunk_overlap=100)
-        pdf_chunker.load()
-        chunks = pdf_chunker.split()
-        # chunks = pdf_chunker.format_chunks()
-        embedder = EmbeddingsSimphy(model_name=HUGGINGFACE_EMBEDDING_MODEL_BAAI)
-        vectorstore = embedder.create_vectorstore(chunks)
-    else:
-        logging.info("Vector store already exists. Loading from cache...")
-        embedder = EmbeddingsSimphy(model_name=HUGGINGFACE_EMBEDDING_MODEL_BAAI)
-        vectorstore = embedder.load_vectorstore()
+    # if not PDFChunker().check_vectorstore_before_load():
+    pdf_chunker = PDFChunker(pdf_path=SCRIPT_DIR+"/docs/SimpScriptGPart4Ch4.pdf", chunk_size=1000, chunk_overlap=100)
+    pdf_chunker.load()
+    chunks = pdf_chunker.split()
+    # chunks = pdf_chunker.format_chunks()
+    embedder = EmbeddingsSimphy(model_name=HUGGINGFACE_EMBEDDING_MODEL_BAAI,save_vectorstore=False)
+    vectorstore = embedder.create_vectorstore(chunks)
+    # else:
+    #     logging.info("Vector store already exists. Loading from cache...")
+    #     embedder = EmbeddingsSimphy(model_name=HUGGINGFACE_EMBEDDING_MODEL_BAAI)
+    #     vectorstore = embedder.load_vectorstore()
     if vectorstore is None:
         logging.error("Failed to load vector store. Exiting.")
         exit(1)
@@ -432,7 +458,7 @@ if __name__ == "__main__":
         
         
         doc = retriever.retrieve(query=query, k=7)
-
+    
         logging.info(f"Result of the query: {query}\n\n".format(query=query))
         for i, doc2 in enumerate(doc, 1):
                 

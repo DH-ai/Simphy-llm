@@ -66,15 +66,11 @@ class PDFChunker:
             chunk.page_content= f"Represent this passage for retrieval: {chunk.page_content}"
         return self.chunks
 
-    def format_chunks(self, prefix="Represent this passage for retrieval: "):
-        for chunk in self.chunks:
-            chunk.page_content = f"{prefix}{chunk.page_content}"
-        return self.chunks
     
     def check_vectorstore_before_load(self):
         """Check if the vectorstore is already created."""
         return EmbeddingsSimphy().check_vectorstore()
-    
+        
     
     def __repr__(self):
         return f"PDFChunker(pdf_path={self.pdf_path}, chunk_size={self.chunk_size}, chunk_overlap={self.chunk_overlap})"

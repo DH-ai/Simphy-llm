@@ -18,16 +18,17 @@ class EmbeddingsSimphy:
     """
     Class to handle embedding generation and vector store creation using HuggingFace embeddings.
     """
-    def __init__(self, model_name="BAAI/bge-base-en-v1.5", qdrantdb_path=None):
+    def __init__(self, model_name="BAAI/bge-base-en-v1.5", qdrantdb_path=None,save_vectorstore=True):
         self.model_name = model_name
         self.qdrantdb_path = qdrantdb_path if qdrantdb_path else ":memory:"  # Default to in-memory if no path is provided
         self.vectorstore = None  # Initialize vectorstore attribute
+        self.save_vectorstore = save_vectorstore  # Flag to control saving of vectorstore
 
     def create_vectorstore(self, chunks) -> FAISS | None:
         """
         Create vectorstore for the given chunks of text.
         """
-        if self.check_vectorstore():
+        if self.save_vectorstore or self.check_vectorstore():
             try:
                 logger.info("Loading cached vector store from disk...")
                 with open(CACHED_INDEX_PATH, "rb") as f:
@@ -45,6 +46,11 @@ class EmbeddingsSimphy:
                     # show_progress=True,
                       # Show progress bar during embedding generation)
                 )
+                # print(__name__)
+                # logger.info(f"Using embedding model: {self.model_name}")
+                # print(chunks[0].page_content[:200])  # Print first 200 characters of the first chunk for debugging
+
+
                 vectorstore = FAISS.from_documents(
                     documents=chunks,
                     embedding=embedding_model,
@@ -55,9 +61,9 @@ class EmbeddingsSimphy:
                 # logging.info("Embeddings created successfully.")
                 self.vectorstore = vectorstore # Initialize the vectorstore attribute
                 
-                
-                with open(CACHED_INDEX_PATH, "wb") as f:
-                    pickle.dump(vectorstore, f)
+                if self.save_vectorstore:
+                    with open(CACHED_INDEX_PATH, "wb") as f:
+                        pickle.dump(vectorstore, f)
                 return vectorstore
             except Exception as e:
                 logging.error(f"Failed to create embeddings: {e}")
@@ -78,13 +84,13 @@ class EmbeddingsSimphy:
             return None
     def check_vectorstore(self):
         """Check if the vectorstore is already created."""
-        # if os.path.exists(CACHED_INDEX_PATH):
-        #     # logger.info("Vector store already exists.")
-        #     return True
-        # else:
-        #     # logger.warning("No vector store found. Please create one first.")
-        #     return False
-        return False
+        if os.path.exists(CACHED_INDEX_PATH):
+            # logger.info("Vector store already exists.")
+            return True
+        else:
+            # logger.warning("No vector store found. Please create one first.")
+            return False
+        # return False
     
 
 

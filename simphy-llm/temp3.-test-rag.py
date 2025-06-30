@@ -22,7 +22,7 @@ if __name__ == "__main__":
         pdf_chunker.load()
         chunks = pdf_chunker.split()
         # chunks = pdf_chunker.format_chunks()
-        embedder = EmbeddingsSimphy(model_name=HUGGINGFACE_EMBEDDING_MODEL_BAAI)
+        embedder = EmbeddingsSimphy(model_name="BAAI/bge-large-en")
         vectorstore = embedder.create_vectorstore(chunks)
     else:
         logging.info("Vector store already exists. Loading from cache...")
@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
         
         
-        doc = retriever.retrieve(query=query, k=7)
+        doc = retriever.retrieve(query=query, k=5)
 
         logging.info(f"Result of the query: {query}\n\n".format(query=query))
         for i, doc2 in enumerate(doc, 1):
