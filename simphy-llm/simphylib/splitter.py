@@ -6,8 +6,14 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 import logging
 logger = logging.getLogger(__name__)
 from langchain_core.documents import Document
-# from simphylib.embedder import EmbeddingsSimphy 
-from embedder import EmbeddingsSimphy
+
+try:
+    from simphylib.embedder import EmbeddingsSimphy 
+except ImportError:
+    # If the import fails, it means the module is not in the path.
+    # This is a workaround to avoid circular imports.
+    from embedder import EmbeddingsSimphy
+# from embedder import EmbeddingsSimphy
 
 import os 
 from rake_nltk import Rake
@@ -77,7 +83,7 @@ class PDFChunker:
     
     def __repr__(self):
         return f"PDFChunker(pdf_path={self.pdf_path}, chunk_size={self.chunk_size}, chunk_overlap={self.chunk_overlap})"
-    
+   
 
 page_prahse = []
 if __name__ == "__main__":
@@ -98,13 +104,16 @@ if __name__ == "__main__":
     
 
     print(f"Loaded {len(docs)} documents")
-    print(docs[0].page_content)  # Print first 200 characters of the first document
+    print(docs[0].metadata)  
     print(f"Extracted phrases from the first document: \n{page_prahse[0]}")
 
     for i in page_prahse:
         print("Phrases from document:")
 
         print(i)
+        if "addPolyg" in i:
+            print("Found 'addPolygon' in the phrases.")
+            break
         print("-" * 30+ f"{len(i)} different keywords")
         
     

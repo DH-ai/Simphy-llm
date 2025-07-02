@@ -13,6 +13,9 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 from typing import List, Union
 
+
+import time
+t = time.time()
 def formater(text) -> str:
     """Format the text for better readability."""
     # Remove leading and trailing whitespace
@@ -367,23 +370,23 @@ def generate(content):
         # num_beams=1,
     )
 
-    response = client.models.generate_content(
-        model=model,
-        contents=content,
-        config=generate_content_config,
-    )
-    # formater(response.text)
-    print(response.text)
-    model_output_temp=""
-    # for chunk in client.models.generate_content_stream(
+    # response = client.models.generate_content(
     #     model=model,
     #     contents=content,
     #     config=generate_content_config,
-    # ):
-    #     modell_output_temp = model_output_temp +"\n" +str(chunk.text)
+    # )
+    # formater(response.text)
+    # print(response.text)
+    model_output_temp=""
+    for chunk in client.models.generate_content_stream(
+        model=model,
+        contents=content,
+        config=generate_content_config,
+    ):
+        model_output_temp = model_output_temp +"\n" +str(chunk.text)
         
     # resposne = formater(model_output_temp)
-    # print(model_output_temp)
+    print(model_output_temp)
     new_model_content = types.Content(
         role="model",
         parts=[types.Part.from_text(text= model_output_temp)]
@@ -427,7 +430,7 @@ if __name__ == "__main__":
     logging.info("This is SLiPI, your SimPhy Scripting Assistant.")
     logging.info("Loading PDF and creating vector store...")
     # if not PDFChunker().check_vectorstore_before_load():
-    pdf_chunker = PDFChunker(pdf_path=SCRIPT_DIR+"/docs/SimpScriptGPart4Ch4.pdf", chunk_size=1000, chunk_overlap=100)
+    pdf_chunker = PDFChunker(pdf_path=SCRIPT_DIR+"/docs/SimpScriptG.pdf", chunk_size=1000, chunk_overlap=100)
     pdf_chunker.load()
     chunks = pdf_chunker.split()
     # chunks = pdf_chunker.format_chunks()
@@ -444,6 +447,7 @@ if __name__ == "__main__":
     
 
     logging.info("Enter your queries below. Type 'quit', 'exit', or 'q' to end the session.")
+    print(time.time() - t)
     while True:
         query = input("Query: ")
         if query.lower() in ["quit", "exit", "q"]:
@@ -460,12 +464,12 @@ if __name__ == "__main__":
         doc = retriever.retrieve(query=query, k=7)
     
         logging.info(f"Result of the query: {query}\n\n".format(query=query))
-        for i, doc2 in enumerate(doc, 1):
+        # for i, doc2 in enumerate(doc, 1):
                 
-                print(f"\n\n--- Result {i} ---\n\n")
-                print(f"Page: {doc2.metadata.get('page', 'Unknown')}")
-                print(f"Content: \n{doc2.page_content}...")
-        logging.info("\n\n End of RAG Outout ")
+        #         print(f"\n\n--- Result {i} ---\n\n")
+        #         print(f"Page: {doc2.metadata.get('page', 'Unknown')}")
+        #         print(f"Content: \n{doc2.page_content}...")
+        # logging.info("\n\n End of RAG Outout ")
         output_results(doc,query)
 
             
