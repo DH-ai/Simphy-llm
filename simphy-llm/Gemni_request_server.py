@@ -411,9 +411,9 @@ def output_results(docs, query=None):
     # print(new_user_content.parts)
     new_model_content = generate(new_user_content)
 
-    logging.info(f"Result of the query: {query}\n\n".format(query=query))
-    if not new_model_content:print("-"*17 + "\n" +"{t}".format(t = new_model_content.parts[0]) +"\n"+"-"*17 )
-    logging.info("\n\nEnd of SLiPI Outout ")
+    # logging.info(f"Result of the query: {query}\n\n".format(query=query))
+    # if not new_model_content:print("-"*17 + "\n" +"{t}".format(t = new_model_content.parts[0]) +"\n"+"-"*17 )
+    # logging.info("\n\nEnd of SLiPI Outout ")
     
 
 

@@ -108,3 +108,8 @@ A loop (manual or rule-based) that:
 - decides when to stop querying
 
 “query → rag → refine → better query → better rag → final result”
+
+Imediate Thoughts 
+1. improvinng data by looking at metaddata and reducing the tokens -> splitter
+2. using hybrid search + my custom searching function -> retriever
+3. pooling or file system handling to change the behaviour if i change system instructions, need to think at system level -> gemini request
