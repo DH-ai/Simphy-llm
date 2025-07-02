@@ -119,3 +119,5 @@ Imediate Thoughts
 5. TheBloke/phi-2-GGUF for symentic tagging 
 6. GOal - document = page_content + Metadata(keypharserr frome rake algorithm) + Symentic tagging -> caching 
 6. Also chaining implmentatino ? another lib file Needed
+
+look into - https://www.instill-ai.dev/docs/artifact/upload-filesls
