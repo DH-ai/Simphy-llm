@@ -401,7 +401,7 @@ def output_results(docs, query=None):
     
 
     rag_result = "\n".join([f"Content:{doc.page_content}"for doc in docs])
-    # print(rag_result)
+    # print(rag_result) -> see for if there are spaces in betweeen
     new_user_content = types.Content(
         role="user",
         parts=[

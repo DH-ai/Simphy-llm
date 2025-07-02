@@ -1,4 +1,5 @@
 import os
+import simphylib.vectorstore_server
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 FAISS_INDEX_PATH = os.path.join(SCRIPT_DIR,"/faiss_index") 
@@ -26,7 +27,7 @@ SLiPi only responds when:
     Output only Simphy JS code.
 
     Include no natural language
-    
+
     No inline comments inside the code.
 
     No greetings, explanations, or confirmations outside the code block.

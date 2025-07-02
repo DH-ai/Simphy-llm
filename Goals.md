@@ -109,7 +109,13 @@ A loop (manual or rule-based) that:
 
 “query → rag → refine → better query → better rag → final result”
 
+Batching queries, to send the llm if its still processing one request need to think about he dynamics here  
+
 Imediate Thoughts 
-1. improvinng data by looking at metaddata and reducing the tokens -> splitter
+1. improvinng data by looking at metaddata and reducing the tokens and using layoutpdfreader instead of pymupdf -> splitter
 2. using hybrid search + my custom searching function -> retriever
 3. pooling or file system handling to change the behaviour if i change system instructions, need to think at system level -> gemini request
+4. Running the Vectorstore as a server, for quick retrieval 
+5. TheBloke/phi-2-GGUF for symentic tagging 
+6. GOal - document = page_content + Metadata(keypharserr frome rake algorithm) + Symentic tagging -> caching 
+6. Also chaining implmentatino ? another lib file Needed
