@@ -75,8 +75,8 @@ class PDFChunker:
             chunk.page_content= f"Represent this passage for retrieval: {chunk.page_content}"
         return self.chunks
 
-    
-    def check_vectorstore_before_load(self):
+    @staticmethod
+    def check_vectorstore_before_load():
         """Check if the vectorstore is already created."""
         return EmbeddingsSimphy().check_vectorstore()
         

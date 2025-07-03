@@ -112,7 +112,7 @@ A loop (manual or rule-based) that:
 Batching queries, to send the llm if its still processing one request need to think about he dynamics here  
 
 Imediate Thoughts 
-1. improvinng data by looking at metadata and reducing the tokens and using layoutpdfreader instead of pymupdf -> splitter
+1. improvinng data by looking at metadata and reducing the tokens and using layoutpdfreader instead of pymupdf, writting json parser, extending decoder and encoder, -> splitter 
 2. using hybrid search + my custom searching function -> retriever
 3. pooling or file system handling to change the behaviour if i change system instructions, need to think at system level -> gemini request
 4. Running the Vectorstore as a server, for quick retrieval 
@@ -122,4 +122,3 @@ Imediate Thoughts
 
 look into - https://www.instill-ai.dev/docs/artifact/upload-filesls
 
-Create a simulation of this question in simphy Two disc of radius 0.3 and   of mass 0.3kg and 0.7kg are fixed at the ends of a rectangle which is of length 1.4m  width 0.2 and of negligible mass. The rectangle is set rotating about its center to its length with a uniform angular speed with 3

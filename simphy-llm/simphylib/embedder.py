@@ -82,7 +82,9 @@ class EmbeddingsSimphy:
         except Exception as e:
             logger.error(f"Failed to load vector store: {e}")
             return None
-    def check_vectorstore(self):
+    
+    @staticmethod
+    def check_vectorstore():
         """Check if the vectorstore is already created."""
         if os.path.exists(CACHED_INDEX_PATH):
             # logger.info("Vector store already exists.")
