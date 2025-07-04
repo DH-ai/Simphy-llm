@@ -7,8 +7,8 @@
 
 import docker
 import docker.errors
-import docker.models.Un
-# import docker.models.containers.container
+
+import docker.models.containers
 
 # Pull and run a container (example: Ubuntu, echo hello)
 try:
@@ -36,12 +36,9 @@ try:
     # print("To stop the container, run: docker stop", container.id)
 except docker.errors.DockerException as e:
     print(f"Error listing images: {e}")
-    if container is not Unbound:
-    client.api.kill(container)
+    if isinstance(container, docker.models.containers.Container):
+        print(f"Stopping container {container.name} due to error.")
+        client.api.kill(container)
     print(f"Container {container.name} has been stopped.")
     exit(1)
-    30 lakh, 20lkh capex opex 
-    2.5cr mbf funds, nandan nilenkanl funds from namrita mam fron dean acr -> aiml, sandeep natekar aiml, 1.2 cr
-
-    ioe funds, 60 lakh, dean acr, 1.2 cr, 30 lakh, 20 lakh capex opex
-    ioe -> tl wanted to use = 2lakh 
+    
