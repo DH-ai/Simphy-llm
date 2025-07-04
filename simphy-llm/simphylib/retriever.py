@@ -3,6 +3,9 @@ import logging
 from langchain_core.documents import Document
 from langchain_community.vectorstores import FAISS
 
+
+
+## custom retriever for Simphy using similartiy search + keyword matchinng implmenting hybrid search,
 class RetrieverSimphy:
     """
     Class to handle retrieval of documents using a vector store.
@@ -29,7 +32,7 @@ class RetrieverSimphy:
             raise ValueError(f"Error in retrieving documents: {e}")
         
         query = f"Represent this question for searching relevant passages: {query}"
-        ret = self.vectorstore.as_retriever(search_type="mmr",search_kwargs={"k":7}) 
+        ret = self.vectorstore.as_retriever(search_type="mmr",search_kwargs={"k":k}) 
         doc = ret.invoke(query) #1
         # print(f"Query: {query}")
         # results_with_scores = self.vectorstore.similarity_search_with_score(query, k=k) #2

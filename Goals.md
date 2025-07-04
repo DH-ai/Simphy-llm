@@ -1,49 +1,32 @@
 ## Thigns to do
 ### 1. Store the embeddings model locally, so that it can be reused without reloading - DONE
 ### 4  Store the embeddings in a vector store, such as Qdrant or FAISS for now qdrant - DOnE 
-### 5. Add a method to save the vector store to disk for later use - DONE
-### 6. Add a method to load the vector store from disk - DONE
-### 2. Add a method to search the vector store with a query and return relevant documents that might be a method for the retrivar class - DONE
+
 ### 7. Add a method to update the vector store with new documents - GOOD IDEA
 ### 3. Add error handling for file loading and embedding processes - UHM DONE 
 ### 8. Add a method to delete documents from the vector store - NOT NEEDED FOR NOW - can be worked on later
-### 9. Need to see the docket and internet version of the qdrant client, for now using in-memory for testing - MAYBE LEts keetp it
+### 9. Need to see the docker and internet version of the qdrant client, for now using in-memory for testing - MAYBE Lets keetp it
 ### 10. Add a method to clear the vector store - Good idea
 ### 11. Add a method to modify the metadata of individual chunks - Will work later
 ### 12. Add command-line argument parsing for PDF path - MUST HAI for later
-### 13. Add seperate logic for case when vectorstore is created  - DONE
 
-### 1. understand the usage of both rag_llmshepra.py and rag_newmodel.py
-### 2. understand the reason behind the errors, look for smart chunking, 
-### 3. read the blogs and guides,
-### 4. understand how to run the rag locally 
-### 5. use different models to test accuracy, sentence bert, openai embeddings google etc
-### 6. Try different vector database 
-### 7. Combine embeddings   from different modalities 
-### 8. try quantization techniques Use float8 over float32 for 4x storage reduction with <0.3% performance drop.
-### 9. Try differnt chunking strategy long with trying 
-### 10. Build Multi-retriever Systems: Blend keyword-based and vector search for diverse content types. Augment LLM prompts with retrieved chunks for context-aware answers
-### 11. Use perplexity Resources and guides
+
+
+
 
 Need to think about the API endpoints 
-
-Post filtering of rag output can help
-
-chaining implmentation, 
-
-Memory of past sessions 
+8. try quantization techniques Use float8 over float32 for 4x storage reduction with <0.3% performance drop.
 
 UI forntend for better testing 
 
 Hosting it somewhere for above point
 
-RAG better with new model now - nuce option too of better pdf extraction 
 
 
 
 
 
-Physics aware model
+### Physics aware model
 
 1. Knowlede injection
     Embed Physics principles
@@ -81,9 +64,9 @@ Physics aware model
 3. Output Optimization
     - Post processing; Such that code is exceutable 
 
+
 4. Simulated-Tested Examples
-    
-    ## Curate a Golden Dataset
+    Curate a Golden Dataset
 
     | Scenario | Code Snippet | Physics Key Points |
     |----------|-------------|-------------------|
@@ -99,6 +82,8 @@ Physics aware model
         - PyBullet/Mujoco for automated physics checks
 
 
+
+
 A query rewriting model (e.g., self-ask, REACT, or just GPT-style prompt)
 
 A loop (manual or rule-based) that:
@@ -112,13 +97,15 @@ A loop (manual or rule-based) that:
 Batching queries, to send the llm if its still processing one request need to think about he dynamics here  
 
 Imediate Thoughts 
-1. improvinng data by looking at metadata and reducing the tokens and using layoutpdfreader instead of pymupdf, writting json parser, extending decoder and encoder, -> splitter 
+0. arg parser
+1. improvinng data by looking at metadata and reducing the tokens and using layoutpdfreader instead of pymupdf, writting json parser, extending decoder and encoder, -> splitter, parsed data -> stored locally
 2. using hybrid search + my custom searching function -> retriever
 3. pooling or file system handling to change the behaviour if i change system instructions, need to think at system level -> gemini request
-4. Running the Vectorstore as a server, for quick retrieval 
+4. Running the Vectorstore as a server, for quick retrieval, creating api for it
 5. TheBloke/phi-2-GGUF for symentic tagging 
 6. GOal - document = page_content + Metadata(keypharserr frome rake algorithm) + Symentic tagging -> caching 
-6. Also chaining implmentatino ? another lib file Needed
+7. Also chaining implmentatino ? another lib file Needed, storing prev chats locally, encrypter?
+8. improving rag, small llm fine tuned and iterative rag, might also do post filteringof finalized rag
 
 look into - https://www.instill-ai.dev/docs/artifact/upload-filesls
 

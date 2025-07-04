@@ -1,4 +1,4 @@
-# PDF loading + chunking
+# Document loading + chunking
 
 # from langchain.document_loaders import PyPDFLoader ## deprecated 
 from langchain_community.document_loaders import PyPDFLoader

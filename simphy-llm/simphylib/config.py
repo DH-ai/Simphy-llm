@@ -6,3 +6,4 @@ ALLMINILM = "sentence-transformers/all-MiniLM-L6-v2"
 VECTORSTORE_PATH = os.path.join(CURRENT_DIR, "vectorstore_new.pkl")
 GENMODEL = "gemini-2.0-flash"
 HUGGINGFACE_EMBEDDING_MODEL_BAAI = "BAAI/bge-base-en-v1.5"
+DEFAULT_LLMSHERPAURL = "http://172.17.0.2:5001/api/parseDocument?renderFormat=all&useNewIndentParser=true"
