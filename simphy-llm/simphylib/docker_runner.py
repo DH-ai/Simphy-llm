@@ -20,8 +20,14 @@ except docker.errors.DockerException as e:
     print("sudo usermod -aG docker $USER")
     exit(1)
 LLMSHEPRA_IMAGE = "ghcr.io/nlmatics/nlm-ingestor:latest"
+# container:docker.models.containers.Container 
+
 try:
+    # global container
+    # docker.models.containers.Container 
+    
     img = client.images.list()
+
     if LLMSHEPRA_IMAGE not in [image.tags[0] for image in img if image.tags]:
         print(f"Image {LLMSHEPRA_IMAGE} not found. Pulling the image...")
         client.images.pull(LLMSHEPRA_IMAGE)
@@ -31,14 +37,29 @@ try:
     container = client.containers.run(
         LLMSHEPRA_IMAGE, detach=True, ports={'5000/tcp': 5001}, name="llmsherpa_container"
         )
+    
     print(f"Container {container.name} is running with ID {container.id}.")
-    # print("You can access the LLMSherpa API at http://localhost:8000")
+    
+    
+    # print("You can access the LLMSherpa API at http://localhost:8000")    
     # print("To stop the container, run: docker stop", container.id)
 except docker.errors.DockerException as e:
-    print(f"Error listing images: {e}")
-    if isinstance(container, docker.models.containers.Container):
+    # print(container.name)   
+    print("Error listing images: {e}")
+
+
+print(client.containers.list())
+client.containers.list()
+exit(0)
+try:
+    if 'container' in locals() and isinstance(container, docker.models.containers.Container):
         print(f"Stopping container {container.name} due to error.")
-        client.api.kill(container)
+        client.api.kill(f"{container.name}")
+    else:
+        print("No container to stop.")
     print(f"Container {container.name} has been stopped.")
-    exit(1)
     
+except docker.errors.APIError as e:
+    print(f"Error stopping container: {e}")
+        # print("No container to stop.")
+        
