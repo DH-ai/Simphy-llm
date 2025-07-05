@@ -34,12 +34,7 @@ try:
     else:
         print(f"Image {LLMSHEPRA_IMAGE} already exists.")
 
-    container = client.containers.run(
-        LLMSHEPRA_IMAGE, detach=True, ports={'5000/tcp': 5001}, name="llmsherpa_container"
-        )
-    
-    print(f"Container {container.name} is running with ID {container.id}.")
-    
+   
     
     # print("You can access the LLMSherpa API at http://localhost:8000")    
     # print("To stop the container, run: docker stop", container.id)
@@ -47,19 +42,47 @@ except docker.errors.DockerException as e:
     # print(container.name)   
     print("Error listing images: {e}")
 
-
-print(client.containers.list())
-client.containers.list()
-exit(0)
 try:
-    if 'container' in locals() and isinstance(container, docker.models.containers.Container):
-        print(f"Stopping container {container.name} due to error.")
-        client.api.kill(f"{container.name}")
-    else:
-        print("No container to stop.")
-    print(f"Container {container.name} has been stopped.")
+    container = client.containers.run(
+        LLMSHEPRA_IMAGE, detach=True, ports={'5000/tcp': 5001}, name="llmsherpa_container"
+        )
+    
+    print(f"Container {container.name} is running with ID {container.id}.")
     
 except docker.errors.APIError as e:
-    print(f"Error stopping container: {e}")
+    print(f"Container error: {e}")
+    
+
+
+
+for clnt in client.containers.list(all=True):
+    print(f"Container {clnt.name} is running with ID {clnt.id}.")
+
+print("You can access the LLMSherpa API at http://localhost:5001")
+# client.containers.list()
+# exit(0)
+# try:
+#     if 'container' in locals() and isinstance(container, docker.models.containers.Container):
+#         print(f"Stopping container {container.name} due to error.")
+#         client.api.kill(f"{container.name}")
+#     else:
+#         print("No container to stop.")
+#     print(f"Container {container.name} has been stopped.")
+    
+# except docker.errors.APIError as e:
+#     print(f"Error stopping container: {e}")
         # print("No container to stop.")
-        
+def remove_all_containers():
+    """
+    Remove all containers.
+    """
+    try:
+        for container in client.containers.list(all=True):
+            print(f"Removing container {container.name} with ID {container.id}.")
+            container.remove(force=True)
+        print("All containers have been removed.")
+    except docker.errors.APIError as e:
+        print(f"Error removing containers: {e}")
+remove_all_containers()
+print("All containers have been removed.")
+# exit(0)
