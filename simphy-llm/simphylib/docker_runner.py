@@ -7,82 +7,117 @@
 
 import docker
 import docker.errors
-
-import docker.models.containers
-
-# Pull and run a container (example: Ubuntu, echo hello)
-try:
-    client = docker.from_env()
-except docker.errors.DockerException as e:
-    print(f"Error connecting to Docker: {e}")
-    print("Make sure Docker is running and you have the correct permissions.")
-    print("Run following command to add your user to the docker group:")
-    print("sudo usermod -aG docker $USER")
-    exit(1)
-LLMSHEPRA_IMAGE = "ghcr.io/nlmatics/nlm-ingestor:latest"
-# container:docker.models.containers.Container 
+import logging
 
 try:
-    # global container
-    # docker.models.containers.Container 
-    
-    img = client.images.list()
-
-    if LLMSHEPRA_IMAGE not in [image.tags[0] for image in img if image.tags]:
-        print(f"Image {LLMSHEPRA_IMAGE} not found. Pulling the image...")
-        client.images.pull(LLMSHEPRA_IMAGE)
-    else:
-        print(f"Image {LLMSHEPRA_IMAGE} already exists.")
-
-   
-    
-    # print("You can access the LLMSherpa API at http://localhost:8000")    
-    # print("To stop the container, run: docker stop", container.id)
-except docker.errors.DockerException as e:
-    # print(container.name)   
-    print("Error listing images: {e}")
-
-try:
-    container = client.containers.run(
-        LLMSHEPRA_IMAGE, detach=True, ports={'5000/tcp': 5001}, name="llmsherpa_container"
-        )
-    
-    print(f"Container {container.name} is running with ID {container.id}.")
-    
-except docker.errors.APIError as e:
-    print(f"Container error: {e}")
-    
+    from simphylib.config import LLMSHERPA_IMAGE, LLMSHERPA_CONTAINER_NAME, DOCKER_ERROR_MESSAGE
+except ImportError:
+    from config import LLMSHERPA_IMAGE, LLMSHERPA_CONTAINER_NAME, DOCKER_ERROR_MESSAGE
+logger = logging.getLogger(__name__)
 
 
-
-for clnt in client.containers.list(all=True):
-    print(f"Container {clnt.name} is running with ID {clnt.id}.")
-
-print("You can access the LLMSherpa API at http://localhost:5001")
-# client.containers.list()
-# exit(0)
-# try:
-#     if 'container' in locals() and isinstance(container, docker.models.containers.Container):
-#         print(f"Stopping container {container.name} due to error.")
-#         client.api.kill(f"{container.name}")
-#     else:
-#         print("No container to stop.")
-#     print(f"Container {container.name} has been stopped.")
-    
-# except docker.errors.APIError as e:
-#     print(f"Error stopping container: {e}")
-        # print("No container to stop.")
-def remove_all_containers():
+class DockerRunner:
+    """A class to manage Docker containers for LLMSherpaFileLoader.
+    It ensures the required image exists, runs the container, and provides methods to remove containers.
     """
-    Remove all containers.
-    """
-    try:
-        for container in client.containers.list(all=True):
+    def __init__(self, start_clean = False, image_name=LLMSHERPA_IMAGE, container_name=LLMSHERPA_CONTAINER_NAME):
+        # self.client = docker.from_env()
+        self.image_name = image_name
+        self.container_name = container_name
+        if start_clean:
+            self.remove_all_containers()
+        
+        try:
+            self.client = docker.from_env()
+        except docker.errors.DockerException as e:
+            print(f"Error connecting to Docker: {e}")
+            print(DOCKER_ERROR_MESSAGE)
+            exit(1)
+        if self.ensure_image_exists(self.image_name):
+            try:
+                self.run_container(
+                    image=self.image_name,
+                    ports={'5000/tcp': 5001},
+                    name=self.container_name
+                )
+            except docker.errors.APIError as e:
+                print(f"Error running container: {e}")
+                print(DOCKER_ERROR_MESSAGE)
+                
+
+    def run_container(self, image, ports=None, name=None):
+        """
+            Run a Docker container with the specified image and ports.
+        """
+        try:
+            # Check if the container already exists
+            if name in self.client.containers.list(all=True, filters={"name": name}):
+                print(f"Container with name {name} already exists. Removing it first.")
+                self.remove_container(name)
+                
+            container = self.client.containers.run(
+                image, detach=True, ports=ports, name=name
+            )
+            print(f"Container {container.name} is running with ID {container.id}.")
+        except docker.errors.APIError as e:
+            print(f"Error running container: {e}")
+    
+    def remove_all_containers(self):
+        """
+        Remove all containers.
+        """
+        try:
+            for container in self.client.containers.list(all=True):
+                print(f"Removing container {container.name} with ID {container.id}.")
+                container.remove(force=True)
+            print("All containers have been removed.")
+        except docker.errors.APIError as e:
+            print(f"Error removing containers: {e}")
+    
+    def remove_container(self, container_name):
+        """
+        Remove a specific container by name.
+        """
+        try:
+            container = self.client.containers.get(container_name)
             print(f"Removing container {container.name} with ID {container.id}.")
             container.remove(force=True)
-        print("All containers have been removed.")
-    except docker.errors.APIError as e:
-        print(f"Error removing containers: {e}")
-remove_all_containers()
-print("All containers have been removed.")
-# exit(0)
+            print(f"Container {container_name} has been removed.")
+        except docker.errors.NotFound:
+            print(f"Container {container_name} not found.")
+        except docker.errors.APIError as e:
+            print(f"Error removing container: {e}")
+    
+    
+    def ensure_image_exists(self, image):
+        """
+        Ensure the specified Docker image exists, pulling it if necessary.
+        """
+        try:   
+            img = self.client.images.list()
+
+            if image not in [image.tags[0] for image in img if image.tags]:
+                print(f"Image {image} not found. Pulling the image...")
+                self.client.images.pull(image)
+                print(f"Image {image} has been pulled successfully.")
+            else:
+                print(f"Image {image} already exists.")
+            return True
+        except docker.errors.DockerException as e:
+            print(f"Error listing images: {e}") 
+            print(DOCKER_ERROR_MESSAGE)
+            return False
+        
+    def container_status(self, container_name):
+        """
+        Check the status of a specific container.
+        """
+        try:
+            container = self.client.containers.get(container_name)
+            return container.status
+        except docker.errors.NotFound:
+            print(f"Container {container_name} not found.")
+            return None
+        except docker.errors.APIError as e:
+            print(f"Error checking container status: {e}")
+            return None

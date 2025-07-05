@@ -1,11 +1,16 @@
 try:
     from simphylib.config import DEFAULT_LLMSHERPAURL
+    from simphylib.docker_runner import DockerRunner
 except ImportError:
     from config import DEFAULT_LLMSHERPAURL
+    from docker_runner import DockerRunner
     
 from langchain_community.document_loaders.llmsherpa import LLMSherpaFileLoader
 from langchain_core.documents import Document
 from typing import List, Optional
+
+
+
 
 class Parser:
     "A custom parsing class for modularity and extensibility."
@@ -15,6 +20,7 @@ class Parser:
     def parse(self) -> List[Document]:
         # Implement your parsing logic here
         return self.document
+ 
 
 
 class SimphyFileLoader(LLMSherpaFileLoader):
@@ -26,7 +32,7 @@ class SimphyFileLoader(LLMSherpaFileLoader):
     def __init__(self, file_path, new_indent_parser=False, apply_ocr=False, strategy="sections", llmsherpa_api_url=None):
         super().__init__(file_path=file_path, new_indent_parser=new_indent_parser, apply_ocr=apply_ocr, strategy=strategy, llmsherpa_api_url=llmsherpa_api_url)
 
-
+    ### error handling if api not available using docer class
     def load(self):
         """
         Load the PDF file and return the documents.
