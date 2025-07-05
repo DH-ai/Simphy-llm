@@ -8,7 +8,7 @@ except ImportError:
 from langchain_community.document_loaders.llmsherpa import LLMSherpaFileLoader
 from langchain_core.documents import Document
 from typing import List, Optional
-
+import json
 
 
 
@@ -29,7 +29,7 @@ class SimphyFileLoader(LLMSherpaFileLoader):
     Inherits from LLMSherpaFileLoader.
     """
 
-    def __init__(self, file_path, new_indent_parser=False, apply_ocr=False, strategy="sections", llmsherpa_api_url=None):
+    def __init__(self, file_path, new_indent_parser=False, apply_ocr=False, strategy="sections", llmsherpa_api_url=DEFAULT_LLMSHERPAURL):
         super().__init__(file_path=file_path, new_indent_parser=new_indent_parser, apply_ocr=apply_ocr, strategy=strategy, llmsherpa_api_url=llmsherpa_api_url)
 
     ### error handling if api not available using docer class
@@ -41,26 +41,28 @@ class SimphyFileLoader(LLMSherpaFileLoader):
         docs = super().load()
 
         return Parser(docs).parse()
+    
 
     
 
 
 
-loader = SimphyFileLoader(
-    file_path="simphy-llm/docs/SimpScriptGPart4Ch4.pdf",
-    new_indent_parser=True,
-    apply_ocr=False,
-    strategy="sections",
-    llmsherpa_api_url=DEFAULT_LLMSHERPAURL,
-)
-
 if __name__ == "__main__":
+    docker_runner = DockerRunner()
+    loader = SimphyFileLoader(
+        file_path="simphy-llm/docs/SimpScriptGPart4Ch4.pdf",
+        new_indent_parser=True,
+        apply_ocr=False,
+        strategy="sections",
+        llmsherpa_api_url=DEFAULT_LLMSHERPAURL,
+    
+    )
     docs = loader.load()
     html = ""
     for i, doc in enumerate(iterable=docs, start=0):
         # print("\n"+"-"*40 + f"{i}")
         html = html + str(doc.page_content)
-        # print(doc.page_content)
-    with open("index.html","w") as f:
-        f.write(html)
-        f.close()
+        print(html)
+    # with open("index.json","w") as f:
+    #     json.dump(docs, f, indent=4)
+        

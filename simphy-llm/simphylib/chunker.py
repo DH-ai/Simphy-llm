@@ -1,7 +1,7 @@
 # Document loading + chunking
 
 # from langchain.document_loaders import PyPDFLoader ## deprecated 
-from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyPDFLoader ## Now we are using LLLSherpaFileLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import logging
 logger = logging.getLogger(__name__)
@@ -14,21 +14,27 @@ except ImportError:
     # This is a workaround to avoid circular imports.
     from embedder import EmbeddingsSimphy
 # from embedder import EmbeddingsSimphy
-
+try:
+    from simphylib.parser import SimphyFileLoader
+except ImportError:
+    from parser import SimphyFileLoader
 import os 
 from rake_nltk import Rake
 
 
 import nltk 
-nltk.download('stopwords')
-nltk.download('punkt_tab')
+
+
+nltk.download('stopwords',download_dir=os.path.join(os.getcwd(), "nltk_data"),)
+
+nltk.download('punkt_tab',download_dir=os.path.join(os.getcwd(), "nltk_data"))
 
 
 class PDFChunker:
-
+    ## add a method for different type of loaders
     """Class to handle loading and chunking of PDF documents.
     """
-    def __init__(self, pdf_path:str="", chunk_size=1000, chunk_overlap=100):
+    def __init__(self, pdf_path:str="", chunk_size=1000, chunk_overlap=200, loader="SimphyFileLoader"):
         if not os.path.exists(pdf_path) and pdf_path!="":
             try:
                 print(f"PDF path {pdf_path} does not exist. Attempting to resolve relative path.")
@@ -37,6 +43,9 @@ class PDFChunker:
             except Exception as e:
                 logger.error(f"Error in resolving PDF path: {e}")
                 raise e
+        
+        self.loader = loader
+        
         self.pdf_path = pdf_path
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
@@ -49,11 +58,18 @@ class PDFChunker:
         try:
             if not self.pdf_path:
                 raise ValueError("PDF path must be provided.")
-            logger.info(f"Loading PDF from {self.pdf_path}")
+            # logger.info(f"Loading PDF from {self.pdf_path}")
         except Exception as e:
             logger.error(f"Error loading PDF: {e}")
             raise e
-        loader = PyPDFLoader(self.pdf_path)
+        
+        if self.loader == "SimphyFileLoader":
+            # Use SimphyFileLoader to load the PDF
+            loader = SimphyFileLoader(self.pdf_path)
+        elif self.loader == "PyPDFLoader":
+            # Use PyPDFLoader to load the PDF
+            loader = PyPDFLoader(self.pdf_path)
+        loader = SimphyFileLoader(self.pdf_path)
         self.docs = loader.load()
         return self.docs
 
@@ -80,14 +96,16 @@ class PDFChunker:
         """Check if the vectorstore is already created."""
         return EmbeddingsSimphy().check_vectorstore()
         
-    
+    def modify_metadata(self):
+
+        pass
     def __repr__(self):
         return f"PDFChunker(pdf_path={self.pdf_path}, chunk_size={self.chunk_size}, chunk_overlap={self.chunk_overlap})"
    
 
-page_prahse = []
 if __name__ == "__main__":
-    # Example usage
+    page_prahse = []
+
     pdf_path = "simphy-llm/docs/SimpScriptGPart4Ch4.pdf"  # Replace with your PDF file path
     # chunker = PDFChunker(pdf_path=pdf_path, chunk_size=1000, chunk_overlap=100)
     # docs = chunker.load()

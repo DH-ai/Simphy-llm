@@ -99,13 +99,16 @@ Batching queries, to send the llm if its still processing one request need to th
 Imediate Thoughts 
 0. arg parser
 1. improvinng data by looking at metadata and reducing the tokens and using layoutpdfreader instead of pymupdf, writting json parser, extending decoder and encoder, -> splitter, parsed data -> stored locally
-2. using hybrid search + my custom searching function -> retriever
+2. using hybrid search + my custom searching function + chunk coupling of near by chunks -> retriever
 3. pooling or file system handling to change the behaviour if i change system instructions, need to think at system level -> gemini request
 4. Running the Vectorstore as a server, for quick retrieval, creating api for it
 5. TheBloke/phi-2-GGUF for symentic tagging 
 6. GOal - document = page_content + Metadata(keypharserr frome rake algorithm) + Symentic tagging -> caching 
 7. Also chaining implmentatino ? another lib file Needed, storing prev chats locally, encrypter?
 8. improving rag, small llm fine tuned and iterative rag, might also do post filteringof finalized rag
-
+9. implmenting loading bars, pretty printing, using rich
 look into - https://www.instill-ai.dev/docs/artifact/upload-filesls
 
+
+
+Can it be such that the query instead directly going to rag, the llm decides if it wants to go for the api, might use it for 

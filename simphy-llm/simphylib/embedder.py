@@ -28,7 +28,7 @@ class EmbeddingsSimphy:
         """
         Create vectorstore for the given chunks of text.
         """
-        if self.save_vectorstore or self.check_vectorstore():
+        if self.check_vectorstore():
             try:
                 logger.info("Loading cached vector store from disk...")
                 with open(CACHED_INDEX_PATH, "rb") as f:

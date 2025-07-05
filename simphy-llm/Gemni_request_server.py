@@ -1,4 +1,4 @@
-from simphylib.splitter import PDFChunker
+from simphylib.chunker import PDFChunker
 from simphylib.embedder import EmbeddingsSimphy
 from simphylib.retriever import RetrieverSimphy
 from simphylib.config import *
@@ -6,8 +6,12 @@ import os
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
-import json
 load_dotenv()
+import json
+from rich.markdown import Markdown
+from rich.console import Console
+import rich.live
+console = Console()
 import logging  
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%H:%M:%S')
 
@@ -27,10 +31,174 @@ def formater(text) -> str:
     # text = "\n".join(line.strip() for line in text.splitlines() if line.strip())
     return text
     
-from main_config import SCRIPT_DIR,SYSTEM_INSTRUCTION
+from main_config import SCRIPT_DIR,SYSTEM_INSTRUCTION,SYSTEM_INSTRUCTION_RAG_INSPECTOR
 
 ## This is needed for chaining, or mememory, can save on disk and load later,
 ## also can retrive data in case of similar query, or can use it to train the model, maybe in a json format
+
+def generate(content):
+    """Generate content using the Gemini API."""
+    client = genai.Client(
+
+    )
+
+    model = GENMODEL
+    
+    generate_content_config = types.GenerateContentConfig(
+        response_mime_type="text/plain",
+        system_instruction=[
+            types.Part.from_text(text=SYSTEM_INSTRUCTION_RAG_INSPECTOR),
+        ],
+        temperature=0.3,
+        candidate_count=1,
+        # response_mime_type="application/json",
+        top_p=0.63,
+        top_k=20,
+        seed=1,
+        max_output_tokens=8096,
+        # stop_sequences=["STOP!"],
+        # presence_penalty=0.0,
+        frequency_penalty=1.2,
+        # num_beams=1,
+    )
+
+    # response = client.models.generate_content(
+    #     model=model,
+    #     contents=content,
+    #     config=generate_content_config,
+    # )
+    # formater(response.text)
+    # print(response.text)
+    model_output_temp=""
+    for chunk in client.models.generate_content_stream(
+        model=model,
+        contents=content,
+        config=generate_content_config,
+    ):
+        model_output_temp = model_output_temp +"\n" +str(chunk.text)
+        
+    # resposne = formater(model_output_temp)
+    # print(model_output_temp)
+    # os.system(f'glow "{model_output_temp}"')
+    md = Markdown(model_output_temp)
+    console.print(md)
+    new_model_content = types.Content(
+        role="model",
+        parts=[types.Part.from_text(text= model_output_temp)]
+    )
+
+    
+    
+    return new_model_content
+
+
+def output_results(docs, query=None):
+    """Format and print the retrieved documents."""
+    assert isinstance(docs, list), "docs should be a list of Document objects"
+    assert query is None or isinstance(query, str), "query should be a string or None"
+    
+
+    rag_result = "\n".join([f"Rag Result {i}:{doc.page_content}"for i, doc in enumerate(docs,0)])
+    # print(rag_result) -> see for if there are spaces in betweeen
+    new_user_content = types.Content(
+        role="user",
+        parts=[
+            types.Part.from_text(text=f"Rag_result: {rag_result} \n\n Query: {query}") 
+        ],
+    )
+    # print(new_user_content.parts)
+    new_model_content = generate(new_user_content)
+
+    # logging.info(f"Result of the query: {query}\n\n".format(query=query))
+    # if not new_model_content:print("-"*17 + "\n" +"{t}".format(t = new_model_content.parts[0]) +"\n"+"-"*17 )
+    # logging.info("\n\nEnd of SLiPI Outout ")
+    
+
+
+ 
+
+if __name__ == "__main__":
+    
+
+
+    
+    logging.info("This is SLiPI, your SimPhy Scripting Assistant.")
+    logging.info("Loading PDF and creating vector store...")
+    if not PDFChunker().check_vectorstore_before_load():
+        pdf_chunker = PDFChunker(pdf_path=SCRIPT_DIR+"/docs/SimpScriptG.pdf", chunk_size=1000, chunk_overlap=300,loader="pypdfloader")
+        pdf_chunker.load()
+        chunks = pdf_chunker.split()
+    # chunks = pdf_chunker.format_chunks()
+        embedder = EmbeddingsSimphy(model_name=HUGGINGFACE_EMBEDDING_MODEL_BAAI,save_vectorstore=True)
+        vectorstore = embedder.create_vectorstore(chunks)
+    else:
+        logging.info("Vector store already exists. Loading from cache...")
+        embedder = EmbeddingsSimphy(model_name=HUGGINGFACE_EMBEDDING_MODEL_BAAI)
+        vectorstore = embedder.load_vectorstore()
+    if vectorstore is None:
+        logging.error("Failed to load vector store. Exiting.")
+        exit(1)
+    retriever = RetrieverSimphy(vectorstore=vectorstore)
+    
+
+    logging.info("Enter your queries below. Type 'quit', 'exit', or 'q' to end the session.")
+    print(time.time() - t)
+    while True:
+        query = input("Query: ")
+        query = str(query)
+        if query.lower() in ["quit", "exit", "q"]:
+            break
+        if query.lower() in ['clear', 'cls']:
+            os.system('cls' if os.name == 'nt' else 'clear')
+            continue
+        if not query.strip():
+            logging.warning("Please enter a valid query.")
+            continue
+
+        
+        
+        doc = retriever.retrieve(query=query, k=7)
+    
+        logging.info(f"Result of the query: {query}\n\n".format(query=query))
+        for i, doc2 in enumerate(doc, 1):
+                
+                print(f"\n\n--- Result {i} ---\n\n")
+                print(f"Page: {doc2.metadata.get('page', 'Unknown')}")
+                print(f"Content: \n{doc2.page_content}...")
+        logging.info("\n\n End of RAG Outout ")
+        output_results(doc,query)
+
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 contents_list = [
         types.Content(
             role="user",
@@ -342,135 +510,4 @@ contents_list = [
             ],
         ),
     ]
-
-
-def generate(content):
-    """Generate content using the Gemini API."""
-    client = genai.Client(
-        api_key=os.environ.get("GEMINI_API_KEY"),
-    )
-
-    model = GENMODEL
-    
-    generate_content_config = types.GenerateContentConfig(
-        response_mime_type="text/plain",
-        system_instruction=[
-            types.Part.from_text(text=SYSTEM_INSTRUCTION),
-        ],
-        temperature=0,
-        candidate_count=1,
-        # response_mime_type="application/json",
-        top_p=0.63,
-        top_k=20,
-        seed=1,
-        max_output_tokens=300,
-        # stop_sequences=["STOP!"],
-        # presence_penalty=0.0,
-        frequency_penalty=1.2,
-        # num_beams=1,
-    )
-
-    # response = client.models.generate_content(
-    #     model=model,
-    #     contents=content,
-    #     config=generate_content_config,
-    # )
-    # formater(response.text)
-    # print(response.text)
-    model_output_temp=""
-    for chunk in client.models.generate_content_stream(
-        model=model,
-        contents=content,
-        config=generate_content_config,
-    ):
-        model_output_temp = model_output_temp +"\n" +str(chunk.text)
-        
-    # resposne = formater(model_output_temp)
-    print(model_output_temp)
-    new_model_content = types.Content(
-        role="model",
-        parts=[types.Part.from_text(text= model_output_temp)]
-    )
-
-    
-    
-    return new_model_content
-
-
-def output_results(docs, query=None):
-    """Format and print the retrieved documents."""
-    assert isinstance(docs, list), "docs should be a list of Document objects"
-    assert query is None or isinstance(query, str), "query should be a string or None"
-    
-
-    rag_result = "\n".join([f"Content:{doc.page_content}"for doc in docs])
-    # print(rag_result) -> see for if there are spaces in betweeen
-    new_user_content = types.Content(
-        role="user",
-        parts=[
-            types.Part.from_text(text=f"Rag_result: {rag_result} \n\n Query: {query}") 
-        ],
-    )
-    # print(new_user_content.parts)
-    new_model_content = generate(new_user_content)
-
-    # logging.info(f"Result of the query: {query}\n\n".format(query=query))
-    # if not new_model_content:print("-"*17 + "\n" +"{t}".format(t = new_model_content.parts[0]) +"\n"+"-"*17 )
-    # logging.info("\n\nEnd of SLiPI Outout ")
-    
-
-
- 
-
-if __name__ == "__main__":
-    
-
-
-    
-    logging.info("This is SLiPI, your SimPhy Scripting Assistant.")
-    logging.info("Loading PDF and creating vector store...")
-    # if not PDFChunker().check_vectorstore_before_load():
-    pdf_chunker = PDFChunker(pdf_path=SCRIPT_DIR+"/docs/SimpScriptG.pdf", chunk_size=1000, chunk_overlap=100)
-    pdf_chunker.load()
-    chunks = pdf_chunker.split()
-    # chunks = pdf_chunker.format_chunks()
-    embedder = EmbeddingsSimphy(model_name=HUGGINGFACE_EMBEDDING_MODEL_BAAI,save_vectorstore=False)
-    vectorstore = embedder.create_vectorstore(chunks)
-    # else:
-    #     logging.info("Vector store already exists. Loading from cache...")
-    #     embedder = EmbeddingsSimphy(model_name=HUGGINGFACE_EMBEDDING_MODEL_BAAI)
-    #     vectorstore = embedder.load_vectorstore()
-    if vectorstore is None:
-        logging.error("Failed to load vector store. Exiting.")
-        exit(1)
-    retriever = RetrieverSimphy(vectorstore=vectorstore)
-    
-
-    logging.info("Enter your queries below. Type 'quit', 'exit', or 'q' to end the session.")
-    print(time.time() - t)
-    while True:
-        query = input("Query: ")
-        if query.lower() in ["quit", "exit", "q"]:
-            break
-        if query.lower() in ['clear', 'cls']:
-            os.system('cls' if os.name == 'nt' else 'clear')
-            continue
-        if not query.strip():
-            logging.warning("Please enter a valid query.")
-            continue
-
-        
-        
-        doc = retriever.retrieve(query=query, k=7)
-    
-        logging.info(f"Result of the query: {query}\n\n".format(query=query))
-        # for i, doc2 in enumerate(doc, 1):
-                
-        #         print(f"\n\n--- Result {i} ---\n\n")
-        #         print(f"Page: {doc2.metadata.get('page', 'Unknown')}")
-        #         print(f"Content: \n{doc2.page_content}...")
-        # logging.info("\n\n End of RAG Outout ")
-        output_results(doc,query)
-
-            
 
