@@ -2,6 +2,8 @@
 
 
 from langchain_huggingface import HuggingFaceEmbeddings
+
+# from langchain_core.memory import base
 import torch
 from langchain_community.vectorstores import FAISS
 # from langchain_community.vectorstores import Qdrant
@@ -94,6 +96,17 @@ class EmbeddingsSimphy:
             return False
         # return False
     
+    @staticmethod
+    def delete_vectorstore():
+        """Delete the existing vectorstore."""
+        try:
+            if os.path.exists(CACHED_INDEX_PATH):
+                os.remove(CACHED_INDEX_PATH)
+                logger.info("Vector store deleted successfully.")
+            else:
+                logger.warning("No vector store found to delete.")
+        except Exception as e:
+            logger.error(f"Failed to delete vector store: {e}")
 
 
 

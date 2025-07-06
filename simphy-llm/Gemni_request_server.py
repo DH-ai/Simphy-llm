@@ -2,18 +2,46 @@ from simphylib.chunker import PDFChunker
 from simphylib.embedder import EmbeddingsSimphy
 from simphylib.retriever import RetrieverSimphy
 from simphylib.config import *
+
+
+
 import os
+
+
 from google import genai
 from google.genai import types
+# import vertexai
+
+
+
+
 from dotenv import load_dotenv
 load_dotenv()
-# import json
+
+
+
 from rich.markdown import Markdown
 from rich.console import Console
-# import rich.live
 console = Console()
+
+
+
 import logging  
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%H:%M:%S')
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+## Somethihg called console handler, and set its format
+# console_handler = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# console_handler.setFormatter(formatter)
+
+# logger.addHandler(console_handler)
+
+
+file_handler = logging.FileHandler('vertexai_genai_requests.log')
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
 
 from typing import List, Union
 
@@ -33,25 +61,23 @@ from main_config import SCRIPT_DIR,SYSTEM_INSTRUCTION,SYSTEM_INSTRUCTION_RAG_INS
 ## adding a method to save the ai response along with query and takes the reponse of google ai to save everything to a json file
 def generate(content):
     """Generate content using the Gemini API."""
+    
     client = genai.Client(
         vertexai=True,
         location="global",
-        # project=os.getenv("PROJECT_ID"),  # Ensure you have set this environment variable
-
-        # project=PROJECT_ID,
     )
 
     model = "gemini-2.5-pro"
     
     generate_content_config = types.GenerateContentConfig(
         thinking_config=types.ThinkingConfig(
-            thinking_budget=5000
+            thinking_budget=10000
         ),
         response_mime_type="text/plain",
         system_instruction=[
             types.Part.from_text(text=SYSTEM_INSTRUCTION),
         ],
-        temperature=0.3,
+        temperature=0,
         candidate_count=1,
         # response_mime_type="application/json",
         top_p=0.63,
@@ -64,13 +90,7 @@ def generate(content):
         # num_beams=1,
     )
 
-    # response = client.models.generate_content(
-    #     model=model,
-    #     contents=content,
-    #     config=generate_content_config,
-    # )
-    # formater(response.text)
-    # print(response.text)
+
     model_output_temp=""
     for chunk in client.models.generate_content_stream(
         model=model,
@@ -79,9 +99,7 @@ def generate(content):
     ):
         model_output_temp = model_output_temp +"\n" +str(chunk.text)
         
-    # resposne = formater(model_output_temp)
-    # print(model_output_temp)
-    # os.system(f'glow "{model_output_temp}"')
+
     md = Markdown(model_output_temp)
     console.print(md)
     new_model_content = types.Content(
@@ -125,10 +143,15 @@ if __name__ == "__main__":
 
     
     logging.info("This is SLiPI, your SimPhy Scripting Assistant.")
-    logging.info("Loading PDF and creating vector store...")
-    if not PDFChunker().check_vectorstore_before_load():
+    Loader = "PyPDFLoader"
+    Splitter = "TokenTextSplitter"
+    logger.info(f"Loader: {Loader}")
+    logger.info(f"Splitter: {Splitter}")
+    PDFChunker.delete_vectorstore()  # Delete existing vector store if any
+    if not PDFChunker.check_vectorstore_before_load():
         
-        pdf_chunker = PDFChunker(pdf_path=SCRIPT_DIR+"/docs/SimpScriptG.pdf", chunk_size=1024, chunk_overlap=256,loader="pypdfloader")
+
+        pdf_chunker = PDFChunker(pdf_path=SCRIPT_DIR+"/docs/SimpScriptG.pdf", chunk_size=1024, chunk_overlap=256,loader=Loader,splitter=Splitter)
         pdf_chunker.load()
         chunks = pdf_chunker.split()
     # chunks = pdf_chunker.format_chunks()
@@ -166,10 +189,14 @@ if __name__ == "__main__":
         for i, doc2 in enumerate(doc, 1):
                 
                 print(f"\n\n--- Result {i} ---\n\n")
-                print(f"Page: {doc2.metadata.get('page', 'Unknown')}")
-                print(f"Content: \n{doc2.page_content}...")
-        logging.info("\n\n End of RAG Outout ")
-        output_results(doc,query)
+                print(f"Page: {doc2.metadata.get('page', 'Unknown')} \n")
+                print(f"Content: \n\n{doc2.page_content} \n\n")
+        logging.info(" End of RAG Outout ")
+
+        with open(f"{Splitter}_output.txt", "w") as f:
+            f.write(f"Query: {query}\n\n")
+            f.write(f"Content: \n{doc2.page_content} \n\n")
+        # output_results(doc,query)
 
             
 

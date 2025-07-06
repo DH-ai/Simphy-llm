@@ -1,0 +1,4 @@
+2025-07-06 16:24:30,167 - __main__ - INFO - Loader: SimphyFileLoader
+2025-07-06 16:24:30,167 - __main__ - INFO - Splitter: PyPDFSplitter
+2025-07-06 16:25:48,377 - __main__ - INFO - Loader: PyPDFLoader
+2025-07-06 16:25:48,377 - __main__ - INFO - Splitter: TokenTextSplitter

@@ -1,0 +1,70 @@
+Query: how to creaate a disc
+
+Content: 
+Represent this passage for retrieval: Body("Disc"); d.setPosition(0, 0); d.setVelocity(0, 0); d.applyImpulse(new Vector2(0, 3).product(d.getMass()));
+Actions
+Each body has an action which is updated each frame internally.
+Many types of actions are included with SimPhy.
+These can be instantiated, configured, and added to a body.
+When the action is complete, it will automatically be removed from it.
+Actions are generally used to perform some task, often over time, giving nice effect using specific interpolation.
+Actions are created using methods of actions object, for example following code moves body from position (0,0) to (3,0) in 3 seconds following "bounce" interpolation.
+var d = World.getBody("Disc");
+//don\'t let other forces interact with body d.setMass(0);
+//set initial position of body d.setPosition(0, 0);
+//create action object var a = Actions.moveTo(3, 0, 4, "bounce");
+//set action to body d.setAction(a);
+Try adding the above code in some button click event run simulation, then click the button to see bouncy animation of Disc (assuming it exists in simulation !
+For details about action see chapter dedicated to actions.
+For details about action see chapter dedicated to actions.
+Method Summary for Bodies
+ | Method and Description | Modifier and Type
+ | --- | ---
+ | applyForce(double fx, double fy) | void
+ | applyImpulse(double jx, double jy) Applies Impulse(in Newton-sec) on center of body  applyImpulse(double jx, double jy, double px, double py) | void
+ | Applies Impulse(in Newton sec) at specific point of body Returns the Copy of this body, the copied body is same in look and size, but is placed at origin and has speed zero | Body
+ | copy(boolean applyTransform) Returns the Copy of this body, the copied body is same in look and size | Body
+ | getAction() Returns action associated to the body | Action
+ | getAngularVelocity() | double
+
+Returns angular velocity of the body in radians per second Returns rotation in radians CCW as positive
+ | getBrush() | Brush
+ | getCharge() | double
+ | getFillColor() Returns the fill color. | Color
+ | getHeight() Returns width of bounding box of non transformed body | double
+ | getInertia() Get moment of inertia of body about its center of mass(return 0 of body is static) | double
+ | getMass() Get mass of body (return 0 of body is static) | double
+ | getName() Returns the name of the body. | String
+ | getOpacity() | int
+ | getOutlineColor() Returns the outline color. getPosition() | Color getPosition()
+ | Position coordinates | Vector2
+ | getRotation() | double
+
+getText()
+ | Returns text associated with body |  | String
+ | --- | --- | ---
+ | getUserData() Returns custom user data associated with body Object getVelocity()
+ | Returns coordinates | Vector2 | Vector2
+ | getWidth() Returns height of bounding box of non transformed body | double | double
+ | getzOrder() Returns z-order of the body | int | int
+ | isFbdDrawn() True, if free body diagram of body is to be drawn boolean
+ | isRenderable() Returns Sets visibility of body | boolean | boolean
+ | isSensor() Returns true if body doesn\'t sense and process collision | boolean | boolean
+ | isTouchable() | boolean | boolean
+
+rotate(double th) Sets rotation about its center of mass.
+scaleBy(double xScale, double yScale)
+ | Scales body in each direction | void
+ | scaleTo(double xScale, Scales body in each direction | void
+ | setAction(Action action) Sets Action of body | void
+ | setAngularVelocity(double w) Sets Angular Velocity of body | void
+ | setAnimation(Brush brush) | void
+ | setBrush(Brush brush) | void
+ | setCharge(double charge) | void
+ | setFDrawn(boolean fbdDrawn) Sets free body diagram of the body enabled | void
+ | setFillColor(Color color) Sets Fill Color of the body (to disable filling shape pass null ar arguement) | void
+ | setFillColor(float r, Sets outline color of body | void
+ | setFriction(double mu) Sets friction for body | void
+
+setInertia(double I) setMass(double m 
+
