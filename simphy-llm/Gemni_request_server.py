@@ -2,7 +2,10 @@ from simphylib.chunker import PDFChunker
 from simphylib.embedder import EmbeddingsSimphy
 from simphylib.retriever import RetrieverSimphy
 from simphylib.config import *
-
+from langsmith import traceable
+from langsmith.wrappers import wrap_openai
+# from openai import OpenAI
+# openai_client = wrap_openai(OpenAI)
 
 
 import os
@@ -59,36 +62,42 @@ from main_config import SCRIPT_DIR,SYSTEM_INSTRUCTION,SYSTEM_INSTRUCTION_RAG_INS
 # add this error management google.genai.errors.ClientError
 
 ## adding a method to save the ai response along with query and takes the reponse of google ai to save everything to a json file
+
+client = genai.Client(
+    vertexai=True,
+    location="global",
+)
+# client = wrap_openai(client)
+model = "gemini-2.5-pro"
+
+generate_content_config = types.GenerateContentConfig(
+    thinking_config=types.ThinkingConfig(
+        thinking_budget=10000
+    ),
+    response_mime_type="text/plain",
+    system_instruction=[
+        types.Part.from_text(text=SYSTEM_INSTRUCTION),
+    ],
+    temperature=0,
+    candidate_count=1,
+    # response_mime_type="application/json",
+    top_p=0.63,
+    top_k=20,
+    seed=1,
+    max_output_tokens=8096,
+    # stop_sequences=["STOP!"],
+    # presence_penalty=0.0,
+    frequency_penalty=1.2,
+    # num_beams=1,
+)
+
+
+@traceable(name="generate_content",run_type="llm",)
 def generate(content):
     """Generate content using the Gemini API."""
-    
-    client = genai.Client(
-        vertexai=True,
-        location="global",
-    )
 
-    model = "gemini-2.5-pro"
-    
-    generate_content_config = types.GenerateContentConfig(
-        thinking_config=types.ThinkingConfig(
-            thinking_budget=10000
-        ),
-        response_mime_type="text/plain",
-        system_instruction=[
-            types.Part.from_text(text=SYSTEM_INSTRUCTION),
-        ],
-        temperature=0,
-        candidate_count=1,
-        # response_mime_type="application/json",
-        top_p=0.63,
-        top_k=20,
-        seed=1,
-        max_output_tokens=8096,
-        # stop_sequences=["STOP!"],
-        # presence_penalty=0.0,
-        frequency_penalty=1.2,
-        # num_beams=1,
-    )
+
+
 
 
     model_output_temp=""
@@ -147,7 +156,7 @@ if __name__ == "__main__":
     Splitter = "TokenTextSplitter"
     logger.info(f"Loader: {Loader}")
     logger.info(f"Splitter: {Splitter}")
-    PDFChunker.delete_vectorstore()  # Delete existing vector store if any
+    # PDFChunker.delete_vectorstore()  # Delete existing vector store if any
     if not PDFChunker.check_vectorstore_before_load():
         
 
@@ -196,7 +205,7 @@ if __name__ == "__main__":
         with open(f"{Splitter}_output.txt", "w") as f:
             f.write(f"Query: {query}\n\n")
             f.write(f"Content: \n{doc2.page_content} \n\n")
-        # output_results(doc,query)
+        output_results(doc,query)
 
             
 

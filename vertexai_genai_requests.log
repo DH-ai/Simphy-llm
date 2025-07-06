@@ -2,3 +2,11 @@
 2025-07-06 16:24:30,167 - __main__ - INFO - Splitter: PyPDFSplitter
 2025-07-06 16:25:48,377 - __main__ - INFO - Loader: PyPDFLoader
 2025-07-06 16:25:48,377 - __main__ - INFO - Splitter: TokenTextSplitter
+2025-07-06 18:45:10,914 - __main__ - INFO - Loader: PyPDFLoader
+2025-07-06 18:45:10,914 - __main__ - INFO - Splitter: TokenTextSplitter
+2025-07-06 18:46:54,826 - __main__ - INFO - Loader: PyPDFLoader
+2025-07-06 18:46:54,827 - __main__ - INFO - Splitter: TokenTextSplitter
+2025-07-06 18:48:14,115 - __main__ - INFO - Loader: PyPDFLoader
+2025-07-06 18:48:14,115 - __main__ - INFO - Splitter: TokenTextSplitter
+2025-07-06 18:50:46,658 - __main__ - INFO - Loader: PyPDFLoader
+2025-07-06 18:50:46,660 - __main__ - INFO - Splitter: TokenTextSplitter

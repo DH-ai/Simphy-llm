@@ -97,21 +97,24 @@ class PDFChunker:
          # If docs are not loaded, load them first
          # This is to avoid loading the PDF multiple times unnecessarily
         
-        if splitter_name:
-            # if splitter_name not in PDFChunker.allowed_splitters:
-                self.splitter = splitter_name
-                # logger.warning(f"Invalid splitter type '{splitter_name}', Allowed types {PDFChunker.allowed_splitters}")
+        # if splitter_name:
+        #     # if splitter_name not in PDFChunker.allowed_splitters:
+        #         self.splitter = splitter_name
+        #         # logger.warning(f"Invalid splitter type '{splitter_name}', Allowed types {PDFChunker.allowed_splitters}")
                 
         
         if not self.docs:
             self.load()
 
         if self.splitter == "RecursiveCharacterTextSplitter":
+            print(f"Using {self.splitter} for splitting.")
             splitter = RecursiveCharacterTextSplitter(
                 chunk_size=self.chunk_size,
                 chunk_overlap=self.chunk_overlap
             )
         elif self.splitter == "TokenTextSplitter":
+            print(f"Using {self.splitter} for splitting.")
+
             splitter = TokenTextSplitter(
                 # encoding_name="gpt-2",  
                 chunk_size=self.chunk_size,
@@ -120,25 +123,35 @@ class PDFChunker:
                 
             )
         elif self.splitter == "SpacyTextSplitter":   
+            print(f"Using {self.splitter} for splitting.")
+
             splitter = SpacyTextSplitter(
                 chunk_size=self.chunk_size,
                 chunk_overlap=self.chunk_overlap
             )
         elif self.splitter == "CharacterTextSplitter":
+            print(f"Using {self.splitter} for splitting.")
+
             splitter = CharacterTextSplitter(
 
             )
         elif self.splitter == "NLTKTextSplitter":
+            print(f"Using {self.splitter} for splitting.")
+
             splitter = NLTKTextSplitter(
 
             )
-        elif self.splitter == "SentenceTransformersTokenTextSplitter":   
+        elif self.splitter == "SentenceTransformersTokenTextSplitter": 
+            print(f"Using {self.splitter} for splitting.")
+
             splitter = SentenceTransformersTokenTextSplitter(
                 chunk_overlap=self.chunk_overlap,
-                model_name=HUGGINGFACE_EMBEDDING_MODEL_BAAI
+                # model_name=HUGGINGFACE_EMBEDDING_MODEL_BAAI
             )
         elif self.splitter not in PDFChunker.allowed_splitters:
             logger.warning(f"Invalid splitter type '{self.splitter}, Using RecursiveCharacterTextSplitter Allowed types {PDFChunker.allowed_splitters}' ")
+            print(f"Using {self.splitter} for splitting.")
+
             splitter = RecursiveCharacterTextSplitter(
                 chunk_size=self.chunk_size,
                 chunk_overlap=self.chunk_overlap

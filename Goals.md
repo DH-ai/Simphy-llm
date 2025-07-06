@@ -117,3 +117,5 @@ Can it be such that the query instead directly going to rag, the llm decides if 
 Now there is something called llm parser
 
 dividing the pdf in chapters and parsing each seperately then adding them after unit test specific to each chapter to the vectorstore, probably after running vectr store seperately
+
+The complexity of this project is increased a lot, I should consider using langsmith and langgraphs, Might to early, and setup test and llm evaluators and stuff
