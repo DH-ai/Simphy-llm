@@ -96,8 +96,8 @@ A loop (manual or rule-based) that:
 
 Batching queries, to send the llm if its still processing one request need to think about he dynamics here  
 
-Imediate Thoughts 
-0. arg parser
+# TOD DO # TOD DO # TOD DO # TOD DO # TOD DO 
+0. arg parser, If change in chunking values then restablish the vector store, 
 1. improvinng data by looking at metadata and reducing the tokens and using layoutpdfreader instead of pymupdf, writting json parser, extending decoder and encoder, -> splitter, parsed data -> stored locally
 2. using hybrid search + my custom searching function + chunk coupling of near by chunks -> retriever
 3. pooling or file system handling to change the behaviour if i change system instructions, need to think at system level -> gemini request
@@ -112,3 +112,6 @@ look into - https://www.instill-ai.dev/docs/artifact/upload-filesls
 
 
 Can it be such that the query instead directly going to rag, the llm decides if it wants to go for the api, might use it for 
+
+
+Now there is something called llm parser

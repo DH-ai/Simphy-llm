@@ -7,10 +7,10 @@ from google import genai
 from google.genai import types
 from dotenv import load_dotenv
 load_dotenv()
-import json
+# import json
 from rich.markdown import Markdown
 from rich.console import Console
-import rich.live
+# import rich.live
 console = Console()
 import logging  
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%H:%M:%S')
@@ -20,34 +20,36 @@ from typing import List, Union
 
 import time
 t = time.time()
-def formater(text) -> str:
-    """Format the text for better readability."""
-    # Remove leading and trailing whitespace
-    print(text)
-    text = json.decoder.JSONDecoder().decode(text)
-    print(text)
-    
-        # Replace multiple newlines with a single newline
-    # text = "\n".join(line.strip() for line in text.splitlines() if line.strip())
-    return text
+
+
+
     
 from main_config import SCRIPT_DIR,SYSTEM_INSTRUCTION,SYSTEM_INSTRUCTION_RAG_INSPECTOR
 
 ## This is needed for chaining, or mememory, can save on disk and load later,
 ## also can retrive data in case of similar query, or can use it to train the model, maybe in a json format
+# add this error management google.genai.errors.ClientError
 
+## adding a method to save the ai response along with query and takes the reponse of google ai to save everything to a json file
 def generate(content):
     """Generate content using the Gemini API."""
     client = genai.Client(
+        vertexai=True,
+        location="global",
+        # project=os.getenv("PROJECT_ID"),  # Ensure you have set this environment variable
 
+        # project=PROJECT_ID,
     )
 
-    model = GENMODEL
+    model = "gemini-2.5-pro"
     
     generate_content_config = types.GenerateContentConfig(
+        thinking_config=types.ThinkingConfig(
+            thinking_budget=5000
+        ),
         response_mime_type="text/plain",
         system_instruction=[
-            types.Part.from_text(text=SYSTEM_INSTRUCTION_RAG_INSPECTOR),
+            types.Part.from_text(text=SYSTEM_INSTRUCTION),
         ],
         temperature=0.3,
         candidate_count=1,
@@ -125,7 +127,8 @@ if __name__ == "__main__":
     logging.info("This is SLiPI, your SimPhy Scripting Assistant.")
     logging.info("Loading PDF and creating vector store...")
     if not PDFChunker().check_vectorstore_before_load():
-        pdf_chunker = PDFChunker(pdf_path=SCRIPT_DIR+"/docs/SimpScriptG.pdf", chunk_size=1000, chunk_overlap=300,loader="pypdfloader")
+        
+        pdf_chunker = PDFChunker(pdf_path=SCRIPT_DIR+"/docs/SimpScriptG.pdf", chunk_size=1024, chunk_overlap=256,loader="pypdfloader")
         pdf_chunker.load()
         chunks = pdf_chunker.split()
     # chunks = pdf_chunker.format_chunks()
