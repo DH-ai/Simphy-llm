@@ -8,7 +8,7 @@
 import docker
 import docker.errors
 import logging
-from langchain.serpapi
+# from langchain.serpapi
 try:
     from simphylib.config import LLMSHERPA_IMAGE, LLMSHERPA_CONTAINER_NAME, DOCKER_ERROR_MESSAGE
 except ImportError:

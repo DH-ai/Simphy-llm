@@ -2,6 +2,9 @@ from simphylib.chunker import PDFChunker
 from simphylib.embedder import EmbeddingsSimphy
 from simphylib.retriever import RetrieverSimphy
 from simphylib.config import *
+from simphylib.model_runner import ModelRunner
+
+
 from langsmith import traceable
 from langsmith.wrappers import wrap_openai
 # from openai import OpenAI
@@ -55,7 +58,7 @@ t = time.time()
 
 
     
-from main_config import SCRIPT_DIR,SYSTEM_INSTRUCTION,SYSTEM_INSTRUCTION_RAG_INSPECTOR
+from main_config import SCRIPT_DIR,SYSTEM_INSTRUCTION,SYSTEM_INSTRUCTION_RAG_INSPECTOR,MODEL
 
 ## This is needed for chaining, or mememory, can save on disk and load later,
 ## also can retrive data in case of similar query, or can use it to train the model, maybe in a json format
@@ -96,9 +99,7 @@ generate_content_config = types.GenerateContentConfig(
 def generate(content):
     """Generate content using the Gemini API."""
 
-
-
-
+    # model_runner = ModelRunner(model_name=MODEL,model_provider = "google_vertexai",model_kwargs={"generate_content_config":generate_content_config})
 
     model_output_temp=""
     for chunk in client.models.generate_content_stream(
@@ -107,14 +108,16 @@ def generate(content):
         config=generate_content_config,
     ):
         model_output_temp = model_output_temp +"\n" +str(chunk.text)
-        
+    # model_runner.model.invoke()
 
     md = Markdown(model_output_temp)
     console.print(md)
     new_model_content = types.Content(
         role="model",
         parts=[types.Part.from_text(text= model_output_temp)]
-    )
+    # )
+
+
 
     
     

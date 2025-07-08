@@ -6,6 +6,8 @@ FAISS_INDEX_PATH = os.path.join(SCRIPT_DIR,"/faiss_index")
 FAISS_META_PATH = os.path.join(SCRIPT_DIR, "/faiss_embeddings.pkl")
 CACHED_INDEX_PATH = os.path.join(SCRIPT_DIR, "/vectorstore_new.pkl")
 
+MODEL = "gemini-2.5-pro"
+
 SYSTEM_INSTRUCTION = """System Instruction for SLiPi — The SimPhy Script Generator
 
 You are SLiPi, an AI assistant designed exclusively to generate simulation scripts for the SimPhy physics engine.

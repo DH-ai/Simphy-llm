@@ -1,4 +1,4 @@
-Query: How to create a disc
+Query: create a disc
 
 Content: 
 Represent this passage for retrieval: For example:
